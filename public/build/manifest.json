@@ -1,0 +1,217 @@
+{
+  "resources/assets/fonts/boxicons.eot": {
+    "file": "assets/boxicons-CSrLvhY_.eot",
+    "src": "resources/assets/fonts/boxicons.eot"
+  },
+  "resources/assets/fonts/boxicons.svg": {
+    "file": "assets/boxicons-CUFgZbdB.svg",
+    "src": "resources/assets/fonts/boxicons.svg"
+  },
+  "resources/assets/fonts/boxicons.ttf": {
+    "file": "assets/boxicons-EIQNrSje.ttf",
+    "src": "resources/assets/fonts/boxicons.ttf"
+  },
+  "resources/assets/fonts/boxicons.woff": {
+    "file": "assets/boxicons-CTVby2V1.woff",
+    "src": "resources/assets/fonts/boxicons.woff"
+  },
+  "resources/assets/fonts/boxicons.woff2": {
+    "file": "assets/boxicons-CeGEncwm.woff2",
+    "src": "resources/assets/fonts/boxicons.woff2"
+  },
+  "resources/assets/fonts/hkgrotesk-bold.woff": {
+    "file": "assets/hkgrotesk-bold-CNnIfM9m.woff",
+    "src": "resources/assets/fonts/hkgrotesk-bold.woff"
+  },
+  "resources/assets/fonts/hkgrotesk-light.eot": {
+    "file": "assets/hkgrotesk-light-CFOlwwJU.eot",
+    "src": "resources/assets/fonts/hkgrotesk-light.eot"
+  },
+  "resources/assets/fonts/hkgrotesk-light.woff": {
+    "file": "assets/hkgrotesk-light-Bch7Jc8H.woff",
+    "src": "resources/assets/fonts/hkgrotesk-light.woff"
+  },
+  "resources/assets/fonts/hkgrotesk-medium.eot": {
+    "file": "assets/hkgrotesk-medium-DhAVEcVM.eot",
+    "src": "resources/assets/fonts/hkgrotesk-medium.eot"
+  },
+  "resources/assets/fonts/hkgrotesk-medium.woff": {
+    "file": "assets/hkgrotesk-medium-CPEAN8-4.woff",
+    "src": "resources/assets/fonts/hkgrotesk-medium.woff"
+  },
+  "resources/assets/fonts/hkgrotesk-regular.eot": {
+    "file": "assets/hkgrotesk-regular-C5FQFgYW.eot",
+    "src": "resources/assets/fonts/hkgrotesk-regular.eot"
+  },
+  "resources/assets/fonts/hkgrotesk-regular.woff": {
+    "file": "assets/hkgrotesk-regular-BONCcfZ_.woff",
+    "src": "resources/assets/fonts/hkgrotesk-regular.woff"
+  },
+  "resources/assets/fonts/hkgrotesk-semibold.eot": {
+    "file": "assets/hkgrotesk-semibold-D2R7JsFz.eot",
+    "src": "resources/assets/fonts/hkgrotesk-semibold.eot"
+  },
+  "resources/assets/fonts/hkgrotesk-semibold.woff": {
+    "file": "assets/hkgrotesk-semibold-CaqhRViJ.woff",
+    "src": "resources/assets/fonts/hkgrotesk-semibold.woff"
+  },
+  "resources/assets/fonts/la-brands-400.eot": {
+    "file": "assets/la-brands-400-LN4CMlGg.eot",
+    "src": "resources/assets/fonts/la-brands-400.eot"
+  },
+  "resources/assets/fonts/la-brands-400.svg": {
+    "file": "assets/la-brands-400-DF2WJeNE.svg",
+    "src": "resources/assets/fonts/la-brands-400.svg"
+  },
+  "resources/assets/fonts/la-brands-400.ttf": {
+    "file": "assets/la-brands-400-gDglUfU7.ttf",
+    "src": "resources/assets/fonts/la-brands-400.ttf"
+  },
+  "resources/assets/fonts/la-brands-400.woff": {
+    "file": "assets/la-brands-400-D0lxOIwB.woff",
+    "src": "resources/assets/fonts/la-brands-400.woff"
+  },
+  "resources/assets/fonts/la-brands-400.woff2": {
+    "file": "assets/la-brands-400-Cq-R4OEF.woff2",
+    "src": "resources/assets/fonts/la-brands-400.woff2"
+  },
+  "resources/assets/fonts/la-regular-400.eot": {
+    "file": "assets/la-regular-400-Cx6vm3uW.eot",
+    "src": "resources/assets/fonts/la-regular-400.eot"
+  },
+  "resources/assets/fonts/la-regular-400.svg": {
+    "file": "assets/la-regular-400-DEMIstEh.svg",
+    "src": "resources/assets/fonts/la-regular-400.svg"
+  },
+  "resources/assets/fonts/la-regular-400.ttf": {
+    "file": "assets/la-regular-400-CmnW_RTo.ttf",
+    "src": "resources/assets/fonts/la-regular-400.ttf"
+  },
+  "resources/assets/fonts/la-regular-400.woff": {
+    "file": "assets/la-regular-400-ehe5HgcS.woff",
+    "src": "resources/assets/fonts/la-regular-400.woff"
+  },
+  "resources/assets/fonts/la-regular-400.woff2": {
+    "file": "assets/la-regular-400-DuFMN_sw.woff2",
+    "src": "resources/assets/fonts/la-regular-400.woff2"
+  },
+  "resources/assets/fonts/la-solid-900.eot": {
+    "file": "assets/la-solid-900-DkmX4G2x.eot",
+    "src": "resources/assets/fonts/la-solid-900.eot"
+  },
+  "resources/assets/fonts/la-solid-900.svg": {
+    "file": "assets/la-solid-900-D5IO3BOs.svg",
+    "src": "resources/assets/fonts/la-solid-900.svg"
+  },
+  "resources/assets/fonts/la-solid-900.ttf": {
+    "file": "assets/la-solid-900-BUOWlSBQ.ttf",
+    "src": "resources/assets/fonts/la-solid-900.ttf"
+  },
+  "resources/assets/fonts/la-solid-900.woff": {
+    "file": "assets/la-solid-900-CR_Kd-su.woff",
+    "src": "resources/assets/fonts/la-solid-900.woff"
+  },
+  "resources/assets/fonts/la-solid-900.woff2": {
+    "file": "assets/la-solid-900-TjMEgv3Q.woff2",
+    "src": "resources/assets/fonts/la-solid-900.woff2"
+  },
+  "resources/assets/fonts/materialdesignicons-webfont.eot": {
+    "file": "assets/materialdesignicons-webfont-Cd51xsCA.eot",
+    "src": "resources/assets/fonts/materialdesignicons-webfont.eot"
+  },
+  "resources/assets/fonts/materialdesignicons-webfont.ttf": {
+    "file": "assets/materialdesignicons-webfont-CfT4HAkQ.ttf",
+    "src": "resources/assets/fonts/materialdesignicons-webfont.ttf"
+  },
+  "resources/assets/fonts/materialdesignicons-webfont.woff": {
+    "file": "assets/materialdesignicons-webfont-BqTIB9TP.woff",
+    "src": "resources/assets/fonts/materialdesignicons-webfont.woff"
+  },
+  "resources/assets/fonts/materialdesignicons-webfont.woff2": {
+    "file": "assets/materialdesignicons-webfont-DsMmahHu.woff2",
+    "src": "resources/assets/fonts/materialdesignicons-webfont.woff2"
+  },
+  "resources/assets/fonts/remixicon.eot": {
+    "file": "assets/remixicon-CiuhZXp1.eot",
+    "src": "resources/assets/fonts/remixicon.eot"
+  },
+  "resources/assets/fonts/remixicon.svg": {
+    "file": "assets/remixicon-CUx8lR1i.svg",
+    "src": "resources/assets/fonts/remixicon.svg"
+  },
+  "resources/assets/fonts/remixicon.ttf": {
+    "file": "assets/remixicon-DIVZIXW2.ttf",
+    "src": "resources/assets/fonts/remixicon.ttf"
+  },
+  "resources/assets/fonts/remixicon.woff": {
+    "file": "assets/remixicon-C14Fpfy6.woff",
+    "src": "resources/assets/fonts/remixicon.woff"
+  },
+  "resources/assets/fonts/remixicon.woff2": {
+    "file": "assets/remixicon-B83Wci9r.woff2",
+    "src": "resources/assets/fonts/remixicon.woff2"
+  },
+  "resources/assets/images/chat-bg-pattern.png": {
+    "file": "assets/chat-bg-pattern-Wh8Pe75p.png",
+    "src": "resources/assets/images/chat-bg-pattern.png"
+  },
+  "resources/assets/images/cover-pattern.png": {
+    "file": "assets/cover-pattern-CzcjCYXt.png",
+    "src": "resources/assets/images/cover-pattern.png"
+  },
+  "resources/assets/images/file.png": {
+    "file": "assets/file-UUcTCh9r.png",
+    "src": "resources/assets/images/file.png"
+  },
+  "resources/assets/images/flags/us.svg": {
+    "file": "assets/us-8TV7KmXO.svg",
+    "src": "resources/assets/images/flags/us.svg"
+  },
+  "resources/assets/images/landing/bg-pattern.png": {
+    "file": "assets/bg-pattern-C6uw14rj.png",
+    "src": "resources/assets/images/landing/bg-pattern.png"
+  },
+  "resources/assets/images/modal-bg.png": {
+    "file": "assets/modal-bg-lSTJOrdl.png",
+    "src": "resources/assets/images/modal-bg.png"
+  },
+  "resources/assets/images/new.png": {
+    "file": "assets/new-C2VZ74KJ.png",
+    "src": "resources/assets/images/new.png"
+  },
+  "resources/assets/images/nft/bg-home.jpg": {
+    "file": "assets/bg-home-C5fVY-vT.jpg",
+    "src": "resources/assets/images/nft/bg-home.jpg"
+  },
+  "resources/assets/images/nft/marketplace.png": {
+    "file": "assets/marketplace-C8oADcjy.png",
+    "src": "resources/assets/images/nft/marketplace.png"
+  },
+  "resources/assets/images/sidebar/img-1.jpg": {
+    "file": "assets/img-1-D4e5A7wn.jpg",
+    "src": "resources/assets/images/sidebar/img-1.jpg"
+  },
+  "resources/assets/images/sidebar/img-2.jpg": {
+    "file": "assets/img-2-B6PVHFOz.jpg",
+    "src": "resources/assets/images/sidebar/img-2.jpg"
+  },
+  "resources/assets/images/sidebar/img-3.jpg": {
+    "file": "assets/img-3-C8x2qDej.jpg",
+    "src": "resources/assets/images/sidebar/img-3.jpg"
+  },
+  "resources/assets/images/sidebar/img-4.jpg": {
+    "file": "assets/img-4-Bd_F7ldX.jpg",
+    "src": "resources/assets/images/sidebar/img-4.jpg"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-BxCngw-4.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-q-WJMvJR.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}

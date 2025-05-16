@@ -1,0 +1,31 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
+
+/* resources/css/app.css */
+
+
+/* jsvectormap css */
+
+@import url('../assets/libs/jsvectormap/css/jsvectormap.min.css');
+
+/* Swiper slider css */
+
+@import url('../assets/libs/swiper/swiper-bundle.min.css');
+
+/* Bootstrap Css */
+
+@import url('../assets/css/bootstrap.min.css');
+
+/* Icons Css */
+
+@import url('../assets/css/icons.min.css');
+
+/* App Css */
+
+@import url('../assets/css/app.min.css');
+
+/* Custom Css */
+
+@import url('../assets/css/custom.min.css');

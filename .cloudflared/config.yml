@@ -1,0 +1,7 @@
+tunnel: 710b6dae-b5e5-410d-b0ab-be6b3b171b1b
+credentials-file: /Users/vanlal/.cloudflared/710b6dae-b5e5-410d-b0ab-be6b3b171b1b.json
+
+ingress:
+  - hostname: vsk.zabeza.online
+    service: http://127.0.0.1:8000
+  - service: http_status:404
