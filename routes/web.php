@@ -8,7 +8,9 @@ use App\Http\Middleware\CustomGuestRedirect;
 use App\Http\Controllers\Vsk\frontend\AttendanceController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentCorrectionController;
+use App\Http\Controllers\StudentStatusController;
 use App\Http\Controllers\StudentDropboxController;
+use App\Http\Controllers\StudentAddController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -80,6 +82,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
     Route::get('/students/export', [StudentController::class, 'exportExcel'])->name('students.export');
 
+    Route::get('/students/add', [StudentAddController::class, 'index'])->name('students.add');
+
+    // Store a new student
+    Route::post('/students/store', [StudentAddController::class, 'store'])->name('students.store');
+
     // Student Correction Routes
     Route::get('/students/correction', [StudentCorrectionController::class, 'index'])->name('students.correction');
     Route::post('/students/correction', [StudentCorrectionController::class, 'index'])->name('students.correction.filter');
@@ -89,9 +96,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/students/update-inline', [StudentCorrectionController::class, 'updateInline'])->name('students.update-inline');
 
     // Student Dropbox routes
-    Route::get('/student-dropbox', [StudentDropboxController::class, 'index'])->name('student-dropbox');
-    Route::get('/student-dropbox/filter', [StudentDropboxController::class, 'filter'])->name('student-dropbox.filter');
-    Route::post('/student-dropbox/update', [StudentDropboxController::class, 'update'])->name('student-dropbox.update');
+    Route::get('/student-dropbox', [StudentDropboxController::class, 'index'])->name('students.dropbox');
+    Route::get('/student-dropbox/filter', [StudentDropboxController::class, 'filter'])->name('students.dropbox.filter');
+    Route::post('/student-dropbox/update', [StudentDropboxController::class, 'update'])->name('students.dropbox.update');
+
+    Route::get('/students/status', [StudentStatusController::class, 'index'])->name('students.status');
+
+    // Check student status
+    Route::post('/students/check-status', [StudentStatusController::class, 'checkStatus'])->name('students.check-status');
     // Home route
 //    Route::get('/home', function () {
 //        return view('dashboard');

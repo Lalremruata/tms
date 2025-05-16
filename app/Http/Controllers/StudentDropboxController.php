@@ -111,19 +111,27 @@ class StudentDropboxController extends Controller
                 // Filter by UDISE code
                 $query->where('udise_cd', $udise)
                     ->whereNotIn('stud_status', ['E', 'P']);
+//                $query->where('udise_cd', $udise);
             } elseif (!empty($pe)) {
                 // Filter by student PEN
                 $query->where('student_pen', $pe)
                     ->whereNotIn('stud_status', ['E', 'P']);
+//                $query->where('student_pen', $pe);
             } elseif (!empty($dst)) {
                 // Filter by district
                 $query->join('mizoram115.school_master as b', 'udise_cd', '=', 'b.udise_sch_code')
                     ->where('b.district_cd', $dst)
                     ->whereNotIn('stud_status', ['E', 'P']);
+//                $query->join('mizoram115.school_master as b', 'udise_cd', '=', 'b.udise_sch_code')
+//                    ->where('b.district_cd', $dst);
                 // Apply status filter if provided
 //                if (!empty($stc)) {
 //                    $query->where('stud_status', $stc);
 //                }
+            }else{
+                $query->where('udise_cd', $teacherSchool->chk)
+                    ->whereNotIn('stud_status', ['E', 'P'])
+                    ->limit(50);
             }
 
             // Common conditions and pagination
@@ -149,6 +157,11 @@ class StudentDropboxController extends Controller
 
         $slno = $request->save;  // This is the student PEN
 
+        // Check if student is already Enrolled or Pending
+        $student = Std_profile::where('student_pen', $slno)->first();
+        if ($student && in_array($student->stud_status, ['E', 'P'])) {
+            return back()->with('error', 'Cannot update students who are already Enrolled or Pending');
+        }
         // Directly access the status value
 //        if (!isset($request->status[$slno])) {
 //            return back()->with('error', 'Status information missing for student');

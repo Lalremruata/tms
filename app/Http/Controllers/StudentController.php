@@ -105,7 +105,7 @@ class StudentController extends Controller
                 ->whereIn('a.stud_status', ['E', 'P'])
                 ->orderBy('a.pres_class')
                 ->orderBy('a.student_name')
-                ->get();
+                ->paginate(50);
 
             return view('students.list', compact('students', 'schoolInfo'));
         }
@@ -144,14 +144,42 @@ class StudentController extends Controller
             ->where('udise_sch_code', $ucode)
             ->value('school_name');
 
-        // Clean up the school name for use in a filename
-        $schoolSlug = str_replace([' ', ',', '.'], ['_', '', ''], strtolower($schoolName ?? 'school'));
+        // Clean up the school name for use in a filename, ensuring all invalid characters are removed
+        $schoolSlug = $this->sanitizeFilename($schoolName ?? 'school');
         $fileName = $schoolSlug . '_students_' . date('Y-m-d') . '.xlsx';
 
         // Use the Laravel Excel package to create and download the Excel file
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\StudentsExport($ucode),
+        return Excel::download(
+            new StudentsExport($ucode),
             $fileName
         );
+    }
+
+    /**
+     * Sanitize a string to make it safe for use in filenames
+     * 
+     * @param string $string The string to sanitize
+     * @return string The sanitized string
+     */
+    private function sanitizeFilename($string)
+    {
+        // Remove any character that isn't a letter, number, dash, or underscore
+        $string = preg_replace('/[^\w\d-]/', '_', $string);
+        
+        // Replace multiple consecutive underscores with a single one
+        $string = preg_replace('/_+/', '_', $string);
+        
+        // Convert to lowercase
+        $string = strtolower($string);
+        
+        // Trim underscores from the beginning and end
+        $string = trim($string, '_');
+        
+        // If string is empty after sanitizing, provide a default
+        if (empty($string)) {
+            $string = 'school';
+        }
+        
+        return $string;
     }
 }

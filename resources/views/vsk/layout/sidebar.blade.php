@@ -219,18 +219,22 @@
                 </a> --}}
 
 
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#sidebarLayouts" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarLayouts">
-                        <i class="ri-layout-3-line"></i> <span data-key="t-layouts">STUDENTS</span> <span class="badge badge-pill bg-danger" data-key="t-hot"></span>
+                <li class="nav-item {{ request()->routeIs('students.*') ? 'active' : '' }}">
+                    <a class="nav-link menu-link {{ request()->routeIs('students.*') ? 'active text-primary' : 'text-white' }}"
+                       href="#sidebarLayouts" data-bs-toggle="collapse" role="button"
+                       aria-expanded="{{ request()->routeIs('students.*') ? 'true' : 'false' }}"
+                       aria-controls="sidebarLayouts">
+                        <i class="ri-layout-3-line"></i> <span data-key="t-layouts">STUDENTS</span>
                     </a>
-                    <div class="collapse menu-dropdown" id="sidebarLayouts">
+                    <div class="collapse menu-dropdown {{ request()->routeIs('students.*') ? 'show' : '' }}" id="sidebarLayouts">
                         <ul class="nav nav-sm flex-column">
 {{--                        <a class="nav-link menu-link text-white" href="../../report/stud_list.php"   role="button" aria-expanded="false" aria-controls="sidebarDashboards">--}}
 {{--                                <i class=" ri-drag-move-2-line"></i> <span data-key="t-dashboards">Students List </span>--}}
 {{--                            </a>--}}
-                            <a class="nav-link menu-link text-white" href="{{ route('students.index') }}"   role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                                    <i class=" ri-drag-move-2-line"></i> <span data-key="t-dashboards">Students List </span>
-                                </a>
+                            <a class="nav-link menu-link {{ request()->routeIs('students.index') ? 'active bg-soft-primary text-primary' : 'text-white' }}"
+                               href="{{ route('students.index') }}" role="button">
+                                <i class="ri-drag-move-2-line"></i> <span data-key="t-dashboards">Students List</span>
+                            </a>
                             <a class="nav-link menu-link" href="#sidebarLayoutudi" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarLayouts">
                                <i class="ri-layout-3-line"></i> <span data-key="t-layouts">Check UDISE+</span> <span class="badge badge-pill bg-danger" data-key="t-hot"></span>
                            </a>
@@ -254,9 +258,9 @@
                                 </a>
                             </ul>
                             </div>
-
-                            <a class="nav-link menu-link text-white" href="{{ route('students.correction') }}"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                                <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards">Data Correction </span>
+                            <a class="nav-link menu-link {{ request()->routeIs('students.correction') ? 'active bg-soft-primary text-primary' : 'text-white' }}"
+                               href="{{ route('students.correction') }}" role="button">
+                                <i class="ri-drag-move-2-line"></i> <span data-key="t-dashboards">Data Correction</span>
                             </a>
 
 {{--                              <a class="nav-link menu-link text-white" href="../../attend/stud_correct_all.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">--}}
@@ -265,15 +269,22 @@
                             <a class="nav-link menu-link text-white" href="../../attend/stud_pen_modify.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
                                 <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards">Student PEN Modification</span>
                             </a>
-                            <a class="nav-link menu-link text-white" href="../../attend/stud_pstatus.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                                <i class=" ri-drag-move-2-line"></i> <span data-key="t-dashboards">Present Status</span>
-                            </a>
+{{--                            <a class="nav-link menu-link text-white" href="../../attend/stud_pstatus.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">--}}
+{{--                                <i class=" ri-drag-move-2-line"></i> <span data-key="t-dashboards">Present Status</span>--}}
+{{--                            </a>--}}
 {{--                            <a class="nav-link menu-link text-white" href="../../attend/stud_dropbox.php"   role="button" aria-expanded="false" aria-controls="sidebarDashboards">--}}
 {{--                                <i class="ri-drag-move-fill"></i> <span data-key="t-dashboards">Student DropBox </span>--}}
 {{--                            </a>--}}
-                            <a class="nav-link menu-link text-white" href="{{ route('student-dropbox') }}"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                                <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards">Student Dropbox </span>
+                            <a class="nav-link menu-link {{ request()->routeIs('students.dropbox') ? 'active bg-soft-primary text-primary' : 'text-white' }}"
+                               href="{{ route('students.dropbox') }}" role="button">
+                                <i class="ri-drag-move-2-line"></i> <span data-key="t-dashboards">Student Dropbox</span>
                             </a>
+
+                            <a class="nav-link menu-link {{ request()->routeIs('students.status') ? 'active bg-soft-primary text-primary' : 'text-white' }}"
+                               href="{{ route('students.status') }}" role="button">
+                                <i class="ri-drag-move-2-line"></i> <span data-key="t-dashboards">present Status</span>
+                            </a>
+
 {{--                             <a class="nav-link menu-link text-white" href="../../attend/stud_trf.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">--}}
 {{--                                <i class=" ri-drag-move-2-line"></i> <span data-key="t-dashboards">Transfer One Student from other School </span>--}}
 {{--                            </a>--}}
@@ -290,8 +301,12 @@
 {{--                                <i class=" ri-drag-move-2-line"></i> <span data-key="t-dashboards">Transfer All the Students from Other School </span>--}}
 {{--                            </a>--}}
 
-                            <a class="nav-link menu-link text-white" href="../../attend/student_add.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                                <i class=" ri-drag-move-2-line"></i> <span data-key="t-dashboards">Add Students </span>
+{{--                            <a class="nav-link menu-link text-white" href="../../attend/student_add.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">--}}
+{{--                                <i class=" ri-drag-move-2-line"></i> <span data-key="t-dashboards">Add Students </span>--}}
+{{--                            </a>--}}
+                            <a class="nav-link menu-link {{ request()->routeIs('students.add') ? 'active bg-soft-primary text-primary' : 'text-white' }}"
+                               href="{{ route('students.add') }}" role="button">
+                                <i class="ri-drag-move-2-line"></i> <span data-key="t-dashboards">Add Students</span>
                             </a>
                             <?php if ($isHoliday == 0): ?>
                                 <a class="nav-link menu-link text-white" href="{{route('openstudentattendance')}}"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">

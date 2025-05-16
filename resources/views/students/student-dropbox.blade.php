@@ -1,4 +1,3 @@
-<!-- resources/views/student-dropbox.blade.php -->
 <x-FrontLayout>
     <!-- Include Alpine.js and Font Awesome -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
@@ -49,7 +48,7 @@
             <!-- Filter Section -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-body">
-                    <form id="filter-form" method="GET" action="{{ route('student-dropbox.filter') }}" class="row g-3">
+                    <form id="filter-form" method="GET" action="{{ route('students.dropbox.filter') }}" class="row g-3">
                         @csrf
                         <!-- District dropdown -->
                         <div class="col-md-4">
@@ -92,7 +91,7 @@
                             <button type="submit" class="btn btn-primary me-2">
                                 <i class="fas fa-filter me-1"></i> Apply Filters
                             </button>
-                            <a href="{{ route('student-dropbox') }}" class="btn btn-secondary">
+                            <a href="{{ route('students.dropbox') }}" class="btn btn-secondary">
                                 <i class="fas fa-redo me-1"></i> Reset
                             </a>
                         </div>
@@ -182,31 +181,55 @@
                                     @endphp
 
                                     @foreach ($rows as $index => $row1)
-                                        <tr class="student-row {{ strpos($row1['stud_status'], 'E') !== false ? 'table-success' : 'table-warning' }}">
+                                        <tr class="student-row {{ in_array($row1['stud_status'], ['E', 'P']) ? 'table-success' : 'table-warning' }}">
                                             <td>{{ $startingNumber + $index }}</td>
-                                            <td>{{ $row1['student_pen'] }}</td>
+                                            <td><span class="student-pen">{{ $row1['student_pen'] }}</span></td>
                                             <td>{{ $row1['student_name'] }}</td>
                                             <td>{{ $row1['father_name'] }}</td>
                                             <td>{{ $row1['gender'] == '1' ? 'Male' : 'Female' }}</td>
                                             <td>{{ date('d-m-Y', strtotime($row1['student_dob'])) }}</td>
                                             <td>{{ $row1['mobile_no_1'] }}</td>
                                             <td>{{ $row1['clsid'] }}</td>
-                                            <td>{{ 'Section ' . chr(64 + intval($row1['section_id'])) }}</td>
-                                            <form method="POST" action="{{ route('student-dropbox.update') }}" class="d-inline">
-                                                @csrf
-                                                <td>
-                                                    <select class="form-select form-select-sm me-2" name="status">
-                                                        <option value="E" {{ $row1['stud_status'] == 'E' ? 'selected' : '' }}>Enrolled</option>
-                                                        <option value="P" {{ $row1['stud_status'] == 'P' ? 'selected' : '' }}>Pending</option>
-                                                    </select>
-                                                </td>
-                                                <td>
+                                            <td>{{ 'Section ' . chr(64 + $row1['section_id']) }}</td>
+
+                                            <!-- Handle status and action based on current status -->
+                                            @if(!in_array($row1['stud_status'], ['E', 'P']))
+                                                <!-- Form for students who can be updated -->
+                                                <form method="POST" action="{{ route('students.dropbox.update') }}" class="d-inline">
+                                                    @csrf
                                                     <input type="hidden" name="save" value="{{ $row1['student_pen'] }}">
-                                                    <button type="submit" class="btn btn-sm btn-success">
-                                                        <i class="fas fa-save"></i>
+
+                                                    <td>
+                                                        <select class="form-select form-select-sm"
+                                                                name="status[{{ $row1['student_pen'] }}]">
+                                                            <option value="E" {{ $row1['stud_status'] == 'E' ? 'selected' : '' }}>Enrolled</option>
+                                                            <option value="P" {{ $row1['stud_status'] == 'P' ? 'selected' : '' }}>Pending</option>
+                                                        </select>
+                                                    </td>
+
+                                                    <td>
+                                                        <button type="submit" class="btn btn-sm btn-success">
+                                                            <i class="fas fa-save"></i> Save
+                                                        </button>
+                                                    </td>
+                                                </form>
+                                            @else
+                                                <!-- Display-only for enrolled/pending students -->
+                                                <td>
+                                                    <span class="badge bg-{{ $row1['stud_status'] == 'E' ? 'success' : 'warning' }} text-white p-2">
+                                                        {{ $row1['stud_status'] == 'E' ? 'Enrolled' : 'Pending' }}
+                                                    </span>
+                                                </td>
+
+                                                <td>
+                                                    <button type="button"
+                                                    class="btn btn-sm {{ $row1['stud_status'] == 'E' ? 'btn-primary' : 'btn-warning' }}"
+                                                    onclick="showStudentDetails({{ json_encode($row1) }})"
+                                                    title="View student details">
+                                                    <i class="fas fa-eye"></i> View
                                                     </button>
                                                 </td>
-                                            </form>
+                                            @endif
                                         </tr>
                                     @endforeach
                                     </tbody>
@@ -223,6 +246,74 @@
                             </div>
                         @endif
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Details Modal -->
+    <div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentDetailsModalLabel">Student Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="alert" id="student-status-badge"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Student PEN</label>
+                                <p id="modal-student-pen" class="form-control-plaintext"></p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Name</label>
+                                <p id="modal-student-name" class="form-control-plaintext"></p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Father's Name</label>
+                                <p id="modal-father-name" class="form-control-plaintext"></p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Gender</label>
+                                <p id="modal-gender" class="form-control-plaintext"></p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Date of Birth</label>
+                                <p id="modal-dob" class="form-control-plaintext"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mobile Number</label>
+                                <p id="modal-mobile" class="form-control-plaintext"></p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Class</label>
+                                <p id="modal-class" class="form-control-plaintext"></p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Current Class</label>
+                                <p id="modal-current-class" class="form-control-plaintext"></p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Current Section</label>
+                                <p id="modal-section" class="form-control-plaintext"></p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Current School</label>
+                                <p id="modal-school" class="form-control-plaintext"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -319,6 +410,81 @@
     @endpush
 
     <script>
+        function showStudentDetails(student) {
+            event.preventDefault();
+            // Set the modal title
+            document.getElementById('studentDetailsModalLabel').textContent =
+                'Student Details: ' + student.student_name;
+
+            // Populate student information
+            document.getElementById('modal-student-pen').textContent = student.student_pen;
+            document.getElementById('modal-student-name').textContent = student.student_name;
+            document.getElementById('modal-father-name').textContent = student.father_name;
+            document.getElementById('modal-gender').textContent = student.gender == '1' ? 'Male' : 'Female';
+
+            // Format date nicely
+            const dob = new Date(student.student_dob);
+            const formattedDob = dob.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            document.getElementById('modal-dob').textContent = formattedDob;
+
+            document.getElementById('modal-mobile').textContent = student.mobile_no_1 || 'Not provided';
+            document.getElementById('modal-class').textContent = student.clsid;
+
+            // Create a mapping for class display
+            const classNames = {
+                '-3': 'Class Nursery/KG/PP3',
+                '-2': 'Class LKG/KG1/PP2',
+                '-1': 'Class UKG/KG2/PP1'
+            };
+            for (let i = 1; i <= 12; i++) {
+                classNames[i] = 'Class ' + i;
+            }
+
+            document.getElementById('modal-current-class').textContent =
+                classNames[student.pres_class] || 'Unknown';
+
+            // Create a mapping for section display
+            const sections = {
+                '1': 'Section A',
+                '2': 'Section B',
+                '3': 'Section C',
+                '4': 'Section D',
+                '5': 'Section E',
+                '6': 'Section F',
+                '7': 'Section G'
+            };
+
+            document.getElementById('modal-section').textContent =
+                sections[student.section_id] || 'Unknown';
+
+            document.getElementById('modal-school').textContent = student.schname || 'Unknown';
+
+            // Set status badge
+            const statusBadge = document.getElementById('student-status-badge');
+            if (student.stud_status === 'E') {
+                statusBadge.className = 'alert alert-success';
+                statusBadge.textContent = 'This student is currently Enrolled';
+            } else if (student.stud_status === 'P') {
+                statusBadge.className = 'alert alert-warning';
+                statusBadge.textContent = 'This student is currently Pending';
+            }
+
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));
+            modal.show();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make sure you have Bootstrap 5 JS included for the modal to work
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap JS is not loaded. The modal may not work correctly.');
+            }
+        });
+
         function studentDropbox() {
             return {
                 loading: false,
