@@ -37,7 +37,7 @@
                             <h2 class="text-primary mb-0 fw-bold">Student Dropbox Module</h2>
                         </div>
                         <div>
-                            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
+                            <a href="{{ route('vskdashboard') }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-home"></i> Dashboard
                             </a>
                         </div>

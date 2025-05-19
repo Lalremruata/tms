@@ -1,149 +1,211 @@
 <?php
+    // Helper functions for holiday and attendance checks
+    function isSchoolHoliday($pdo, $udiseCode, $schoolType, $finYear)
+    {
+        // Check for standard holiday in school calendar
+        $holiday = $pdo->prepare("SELECT holid_ay FROM sms.school_holiday
+                                 WHERE finyr = :fy
+                                 AND da_te = :currentDate
+                                 AND (sch_typ = :schoolType OR sch_typ = 'SU' OR sch_typ = 'SA')
+                                 LIMIT 1");
+        $holiday->execute([
+            'fy' => $finYear,
+            'currentDate' => date('Y-m-d'),
+            'schoolType' => $schoolType
+        ]);
+
+        return !empty($holiday->fetchColumn());
+    }
+
+    function isLocalHoliday($pdo, $udiseCode)
+    {
+        // Check for school-specific local holiday
+        $localHoliday = $pdo->prepare("SELECT holid_ay FROM sms.local_holiday
+                                      WHERE :currentDate BETWEEN from_dt AND till_dt
+                                      AND udise_cd = :udiseCode
+                                      LIMIT 1");
+        $localHoliday->execute([
+            'udiseCode' => $udiseCode,
+            'currentDate' => date('Y-m-d')
+        ]);
+
+        return !empty($localHoliday->fetchColumn());
+    }
+
+    function isTeacherOnLeave($pdo, $teacherId)
+    {
+        // Check if teacher is on leave today
+        $leaveCheck = $pdo->prepare("SELECT COUNT(*) FROM sms.leave_mgmt
+                                    WHERE slno = :teacherId
+                                    AND to_char(current_date,'yyyy-mm-dd') BETWEEN from_dt AND till_dt
+                                    AND pres_status = 'SH'");
+        $leaveCheck->execute(['teacherId' => $teacherId]);
+
+        return $leaveCheck->fetchColumn() > 0;
+    }
+
+    function isWithinSchoolHours()
+    {
+        // Check if current time is within school hours (8:00 AM - 3:00 PM)
+        date_default_timezone_set('Asia/Kolkata');
+        $schoolStartTime = DateTime::createFromFormat('H:i', '8:00');
+        $schoolEndTime = DateTime::createFromFormat('H:i', '16:00');
+        $currentTime = new DateTime();
+
+        return ($currentTime >= $schoolStartTime && $currentTime <= $schoolEndTime);
+    }
+
+    function isHolidayOverridden($pdo, $udiseCode, $finYear)
+    {
+        // Check if holiday has been explicitly overridden for this school
+        $overrideCheck = $pdo->prepare("SELECT COUNT(*) FROM sms.skip_holiday
+                                       WHERE finyr = :fy
+                                       AND da_te = :currentDate
+                                       AND udise_cd = :udiseCode");
+        $overrideCheck->execute([
+            'fy' => $finYear,
+            'currentDate' => date('Y-m-d'),
+            'udiseCode' => $udiseCode
+        ]);
+
+        return $overrideCheck->fetchColumn() > 0;
+    }
+
+    function getSchoolType($schoolCategory)
+    {
+        // Map school category ID to school type code
+        $primarySchoolCats = [1, 2, 3, 6, 12];
+        $middleSchoolCats = [2, 3, 4, 5, 6, 7];
+        $secondarySchoolCats = [3, 5, 6, 7, 8, 10, 11];
+
+        if (in_array($schoolCategory, $primarySchoolCats)) {
+            return 'PS'; // Primary School
+        } elseif (in_array($schoolCategory, $middleSchoolCats)) {
+            return 'MS'; // Middle School
+        } elseif (in_array($schoolCategory, $secondarySchoolCats)) {
+            return 'SS'; // Secondary School
+        }
+
+        return '';
+    }
+
+    function getFinancialYear($pdo)
+    {
+        $finYearQuery = $pdo->query("SELECT max(finyr) as finyr FROM sms.finyr");
+        $result = $finYearQuery->fetch(PDO::FETCH_ASSOC);
+
+        return $result['finyr'] ?? '';
+    }
+
+    function checkAttendanceAccess($pdo, $teacherId)
+    {
+        // Main function to determine if attendance can be marked
+        $teacherQuery = $pdo->prepare("SELECT a.udise_sch_code, a.sch_category_id
+                                      FROM mizoram115.school_master a, sms.tch_profile b
+                                      WHERE a.udise_sch_code = b.udise_sch_code
+                                      AND trim(b.slno) = trim(:teacherId)");
+        $teacherQuery->execute(['teacherId' => $teacherId]);
+        $schoolInfo = $teacherQuery->fetch(PDO::FETCH_ASSOC);
+
+        if (!$schoolInfo) {
+            return [
+                'canMarkAttendance' => false,
+                'message' => 'Teacher not found or not assigned to a school'
+            ];
+        }
+
+        $udiseCode = $schoolInfo['udise_sch_code'];
+        $schoolCategory = $schoolInfo['sch_category_id'];
+        $finYear = getFinancialYear($pdo);
+        $schoolType = getSchoolType($schoolCategory);
+
+        // No school type detected - can't determine holiday status
+        if (empty($schoolType)) {
+            return [
+                'canMarkAttendance' => false,
+                'message' => 'Unknown school type'
+            ];
+        }
+
+        // Check holiday conditions in sequence
+        $isHoliday = false;
+        $holidayReason = '';
+
+        // 1. Check standard school holidays
+        if (isSchoolHoliday($pdo, $udiseCode, $schoolType, $finYear)) {
+            $isHoliday = true;
+            $holidayReason = 'School Holiday';
+        }
+
+        // 2. Check local holidays
+        if (!$isHoliday && isLocalHoliday($pdo, $udiseCode)) {
+            $isHoliday = true;
+            $holidayReason = 'Local Holiday';
+        }
+
+        // 3. Check if teacher is on leave
+        if (!$isHoliday && isTeacherOnLeave($pdo, $teacherId)) {
+            $isHoliday = true;
+            $holidayReason = 'Teacher on Leave';
+        }
+
+        // 4. Check school hours
+        if (!$isHoliday && !isWithinSchoolHours()) {
+            $isHoliday = true;
+            $holidayReason = 'Outside School Hours (8:00 AM - 4:00 PM)';
+        }
+
+        // 5. Check if holiday has been overridden
+        if ($isHoliday && isHolidayOverridden($pdo, $udiseCode, $finYear)) {
+            $isHoliday = false;
+            $holidayReason = '';
+        }
+
+        return [
+            'canMarkAttendance' => !$isHoliday,
+            'message' => $holidayReason
+        ];
+    }
+
+    // Main code execution
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-      include '../../conn/dbconn.php';
-      if (!isset($_SESSION['username'])) {
 
-        $isHoliday = 1;
-            // If the session variable is not set, we'll use JavaScript to trigger the logout process
-            $logoutTrigger = true;
-        }   else {
-            if (!isset($_COOKIE['empcd'])) {
-                $defaultValue =   $_SESSION['username']  ;
-                setcookie('empcd', $defaultValue, time() + (86400 * 1), "/"); // Expires in 30 days
-                $_SESSION['empcd'] = $defaultValue;
-            }  else
-            {
-                $_SESSION['empcd'] = $_COOKIE['empcd'];
-            }
+    include '../../conn/dbconn.php';
+    $logoutTrigger = false;
+    $isHoliday = 1;  // Default to holiday (no attendance marking)
+    $holidayReason = 'Attendance Marking Time (8 AM till 4 PM Excluding Holidays)';
 
-            if (!isset($_COOKIE['tme'])) {
-                $lockDuration = 600 * 60;
-                setcookie('tme', $lockDuration, time() + (86400 * 1), "/"); // Expires in 30 days
-                $_SESSION['attendance_locked'] = $lockDuration;
-            }   else {
+    if (!isset($_SESSION['username'])) {
+        // Session expired, trigger logout
+        $logoutTrigger = true;
+    } else {
+        // Set cookies if needed
+        if (!isset($_COOKIE['empcd'])) {
+            $defaultValue = $_SESSION['username'];
+            setcookie('empcd', $defaultValue, time() + (86400 * 1), "/");
+            $_SESSION['empcd'] = $defaultValue;
+        } else {
+            $_SESSION['empcd'] = $_COOKIE['empcd'];
+        }
 
-                 $_SESSION['attendance_locked'] = $_COOKIE['tme'];
-            }
+        if (!isset($_COOKIE['tme'])) {
+            $lockDuration = 600 * 60;
+            setcookie('tme', $lockDuration, time() + (86400 * 1), "/");
+            $_SESSION['attendance_locked'] = $lockDuration;
+        } else {
+            $_SESSION['attendance_locked'] = $_COOKIE['tme'];
+        }
 
-            $logoutTrigger = false;
-            $tid = $_SESSION['username'];
+        // Check if attendance can be marked
+        $tid = $_SESSION['username'];
+        $attendanceStatus = checkAttendanceAccess($pdo, $tid);
 
-            $tch = $pdo->prepare("select a.udise_sch_code ,a.sch_category_id from mizoram115.school_master a, sms.tch_profile b  where a.udise_sch_code = b.udise_sch_code and trim(b.slno) = trim(:tchd)");
-            $tch->execute(['tchd' => $tid]);
-            $rw = $tch->fetchAll(PDO::FETCH_ASSOC);
-            $isHoliday = 0;
-            foreach($rw as $r1) {
-
-                $udisecd = $r1['udise_sch_code'];
-                $cat = $r1['sch_category_id'];
-
-                $fyr = $pdo->query("select max(finyr) as finyr from sms.finyr  ")->fetchAll(PDO::FETCH_ASSOC);
-                $yr ='';
-
-                foreach ($fyr as $row1) {
-                    $yr =   $row1['finyr']  ;
-                }
-                $typ ='';
-                if ($cat == 1 || $cat == 2 || $cat == 3 || $cat == 6 || $cat == 12) {
-                    $typ = 'PS';
-                }else if ($cat == 2 || $cat == 3 || $cat == 4 || $cat == 5 || $cat == 6|| $cat == 7) {
-                    $typ = 'MS';
-                }else if ($cat == 3 || $cat == 5 || $cat == 6|| $cat == 7 || $cat == 8|| $cat == 10) {
-                    $typ = 'SS';
-                }else if ($cat == 3 || $cat == 5 || $cat == 10|| $cat == 11 ) {
-                    $typ = 'SS';
-                }
-
-                if (!empty($typ)){
-                    $dy = '';
-                    $hol = $pdo->prepare("select  holid_ay from sms.school_holiday where finyr = :fy and da_te = :cd and (sch_typ = :ty or sch_typ = 'SU' or sch_typ = 'SA') limit 1");
-                    $hol->execute(['fy' => $yr,'cd'=>date('Y-m-d'),'ty'=>$typ]);
-                    $hl = $hol->fetchAll(PDO::FETCH_ASSOC);
-                    foreach ($hl as $hls) {
-                        $dy =   $hls['holid_ay']  ;
-                    }
-                    if (!empty($dy)) {
-                        $isHoliday = 1;
-                    }  else
-                    {
-                        $isHoliday = 0;
-                    }
-
-                    if ($isHoliday == 0) {
-
-                        $loc = $pdo->prepare("select  holid_ay from sms.local_holiday where :dt between from_dt and till_dt and udise_cd = :uid limit 1");
-                        $loc->execute(['uid' => $udisecd,'dt'=>date('Y-m-d')]);
-                        $ll = $loc->fetchAll(PDO::FETCH_ASSOC);
-                        foreach ($ll as $hll) {
-                            $dy =   $hll['holid_ay']  ;
-                        }
-                        if (!empty($dy)) {
-                            $isHoliday = 1;
-                        }  else
-                        {
-                            $isHoliday = 0;
-                        }
-                    }
-                }
-
-            $ck = 0;
-
-            if ($isHoliday == 0) {
-                $lvmgt = $pdo->prepare("select count(*) as nsc from sms.leave_mgmt where   slno = :sln and to_char(current_date,'yyyy-mm-dd') between from_dt and till_dt and pres_status = 'SH'");
-                $lvmgt->execute(['sln'=>$tid]);
-                $lvm = $lvmgt->fetchAll();
-                foreach ($lvm as $hls1) {
-                    $ck =   $hls1['nsc']  ;
-                }
-
-                if ($ck > 0) {
-                    $isHoliday = 1;
-                } else
-                {
-                    $isHoliday = 0;
-                }
-            }
-
-            if ($isHoliday == 0) {
-                date_default_timezone_set('Asia/Kolkata');
-                $startTime = "8:00";
-                $endTime = "16:00";
-                $startDateTime = DateTime::createFromFormat('H:i', $startTime);
-                $endDateTime = DateTime::createFromFormat('H:i', $endTime);
-
-                $currentDateTime = new DateTime();
-
-
-
-                if ($currentDateTime >= $startDateTime && $currentDateTime <= $endDateTime) {
-                    $isHoliday = 0;
-                }  else
-                {
-                    $isHoliday = 1;
-                }
-            }
-
-                if ($isHoliday == 1) {
-                    $hol = $pdo->prepare("select count(*) as prs from sms.skip_holiday where finyr = :fy and da_te = :cd and udise_cd = :ucd ");
-                    $hol->execute(['fy' => $yr,'cd'=>date('Y-m-d'),'ucd'=>$udisecd]);
-                    $hl = $hol->fetchAll(PDO::FETCH_ASSOC);
-                    foreach ($hl as $hls) {
-                        $ck =   $hls['prs']  ;
-
-                    }
-                    if (!empty($ck)) {
-                        $isHoliday = 0;
-                    }  else
-                    {
-                        $isHoliday = 1;
-                    }
-                }
-
-
-     }
-
+        $isHoliday = $attendanceStatus['canMarkAttendance'] ? 0 : 1;
+        if (!empty($attendanceStatus['message'])) {
+            $holidayReason = $attendanceStatus['message'];
+        }
     }
 ?>
  <script type="text/javascript">
@@ -210,7 +272,7 @@
             </ul> --}}
 
             <li class="nav-item">
-                <a class="nav-link menu-link text-white" href="vskdashboard"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
+                <a class="nav-link menu-link text-white" href="{{ route('vskdashboard') }}"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
                     <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Dashboards</span>
                 </a>
                 <hr class="text-white">
@@ -266,9 +328,9 @@
 {{--                              <a class="nav-link menu-link text-white" href="../../attend/stud_correct_all.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">--}}
 {{--                                <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards">Data Correction </span>--}}
 {{--                            </a>--}}
-                            <a class="nav-link menu-link text-white" href="../../attend/stud_pen_modify.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                                <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards">Student PEN Modification</span>
-                            </a>
+{{--                            <a class="nav-link menu-link text-white" href="../../attend/stud_pen_modify.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">--}}
+{{--                                <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards">Student PEN Modification</span>--}}
+{{--                            </a>--}}
 {{--                            <a class="nav-link menu-link text-white" href="../../attend/stud_pstatus.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">--}}
 {{--                                <i class=" ri-drag-move-2-line"></i> <span data-key="t-dashboards">Present Status</span>--}}
 {{--                            </a>--}}
@@ -309,19 +371,15 @@
                                 <i class="ri-drag-move-2-line"></i> <span data-key="t-dashboards">Add Students</span>
                             </a>
                             <?php if ($isHoliday == 0): ?>
-                                <a class="nav-link menu-link text-white" href="{{route('openstudentattendance')}}"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                                <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards">Mark Attendance </span>
-                                </a>
-                              <?php else : ?>
-                                <?php if (empty($dy)) {
-                                       $dy = 'Attenance Marking Time (8 AM till 4 PM Excluding Holidays)';
-                                  } ?>
-
-                                    <a class="nav-link menu-link text-white" href="#"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                                          <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards"><?= $dy ?></span>
-                                        </a>
-
-                              <?php endif; ?>
+                            <a class="nav-link menu-link {{ request()->routeIs('students.attendance') ? 'active bg-soft-primary text-primary' : 'text-white' }}"
+                               href="{{route('students.attendance')}}" role="button">
+                                <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards">Mark Attendance</span>
+                            </a>
+                            <?php else: ?>
+                            <a class="nav-link menu-link text-white" href="#" role="button">
+                                <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards"><?= $holidayReason ?></span>
+                            </a>
+                            <?php endif; ?>
                         </ul>
                     </div>
                 </li>
@@ -341,16 +399,12 @@
                             </a>
 
 
-                            <?php else : ?>
-                                <?php if (empty($dy)) {
-                                       $dy = 'Attenance Marking Time (8 AM till 4 PM Excluding Holidays)';
-                                  } ?>
+                            <?php else: ?>
+                            <a class="nav-link menu-link text-white" href="#" role="button">
+                                <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards"><?= $holidayReason ?></span>
+                            </a>
+                            <?php endif; ?>
 
-                                <a class="nav-link menu-link text-white" href="#"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                            <i class="ri-mark-pen-line"></i> <span data-key="t-dashboards"><?= $dy ?> </span>
-                              </a>
-
-                              <?php endif; ?>
 
                             <a class="nav-link menu-link text-white" href="../../report/tch_leave_register.php"  role="button" aria-expanded="false" aria-controls="sidebarDashboards">
                                 <i class=" ri-drag-move-2-line"></i> <span data-key="t-dashboards">Attendance Register</span>

@@ -35,9 +35,18 @@
                 <div class="card-body">
                     <form action="{{ route('students.update') }}" method="POST" id="editStudentForm" class="row g-3">
                         @csrf
-                        <input type="hidden" id="student_pen" name="student_pen" value="{{ $student->student_pen }}">
+{{--                        <input type="hidden" id="student_pen" name="student_pen" value="{{ $student->student_pen }}">--}}
 
                         <!-- Student Information Section -->
+                        <div class="col-md-6">
+                            <label for="student_pen" class="form-label fw-bold">Current Student PEN</label>
+                            <input type="text" class="form-control" id="student_pen" name="student_pen" value="{{ $student->student_pen }}" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="new_student_pen" class="form-label fw-bold">New Student PEN (only if changing)</label>
+                            <input type="text" class="form-control" id="new_student_pen" name="new_student_pen" placeholder="Leave blank to keep current PEN">
+                        </div>
                         <div class="col-12 mb-3">
                             <h5 class="text-primary border-bottom pb-2">Student Information</h5>
                         </div>

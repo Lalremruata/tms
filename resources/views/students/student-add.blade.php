@@ -25,14 +25,14 @@
                     <h1 class="app-page-title">Student Addition</h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('vskdashboard') }}">Dashboard</a></li>
                             <li class="breadcrumb-item"><a href="{{ route('students.index') }}">Students</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Add New Student</li>
                         </ol>
                     </nav>
                 </div>
                 <div>
-                    <a href="{{ route('dashboard') }}" class="btn btn-outline-primary">
+                    <a href="{{ route('vskdashboard') }}" class="btn btn-outline-primary">
                         <i class="fas fa-home me-2"></i>Dashboard
                     </a>
                 </div>
@@ -70,7 +70,7 @@
             <!-- Student Addition Form -->
             <form action="{{ route('students.store') }}" method="POST" id="studentAddForm" novalidate class="needs-validation">
                 @csrf
-                
+
                 <!-- Hidden fields for school information -->
                 <input type="hidden" name="dstcd" value="{{ $schoolInfo->dstcd }}">
                 <input type="hidden" name="blkcd" value="{{ $schoolInfo->blkcd }}">
@@ -91,7 +91,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <div class="form-floating">
-                                            <input type="text" name="nattchcode" id="studentpen" class="form-control @error('nattchcode') is-invalid @enderror" 
+                                            <input type="text" name="nattchcode" id="studentpen" class="form-control @error('nattchcode') is-invalid @enderror"
                                                   value="{{ old('nattchcode') }}" placeholder="Student PEN">
                                             <label for="studentpen">Student PEN (Optional)</label>
                                             <div class="form-text">Leave blank to auto-generate</div>
@@ -100,10 +100,10 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    
+
                                     <div class="col-md-4">
                                         <div class="form-floating">
-                                            <input type="text" name="tchname" id="studentname" class="form-control @error('tchname') is-invalid @enderror" 
+                                            <input type="text" name="tchname" id="studentname" class="form-control @error('tchname') is-invalid @enderror"
                                                   value="{{ old('tchname') }}" placeholder="Student Name" required>
                                             <label for="studentname">Student Name <span class="text-danger">*</span></label>
                                             @error('tchname')
@@ -111,7 +111,7 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    
+
                                     <div class="col-md-4">
                                         <div class="form-floating">
                                             <select name="se_x" id="se_x" class="form-select @error('se_x') is-invalid @enderror" required>
@@ -126,11 +126,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="row g-3 mt-2">
                                     <div class="col-md-4">
                                         <div class="form-floating date-picker-container">
-                                            <input type="text" id="dateraw" name="dob_raw" class="form-control @error('dob') is-invalid @enderror" 
+                                            <input type="text" id="dateraw" name="dob_raw" class="form-control @error('dob') is-invalid @enderror"
                                                   value="{{ old('dob_raw') }}" placeholder="DD/MM/YYYY" required>
                                             <label for="dateraw">Date of Birth <span class="text-danger">*</span></label>
                                             <input type="hidden" id="date" name="dob" value="{{ old('dob') }}">
@@ -140,7 +140,7 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    
+
                                     <div class="col-md-4">
                                         <div class="form-floating">
                                             <select name="prcls" id="studentclass" class="form-select @error('prcls') is-invalid @enderror" required>
@@ -157,7 +157,7 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    
+
                                     <div class="col-md-4">
                                         <div class="form-floating">
                                             <select name="sec" id="studentsec" class="form-select @error('sec') is-invalid @enderror" required>
@@ -181,7 +181,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Family Information Card -->
                     <div class="col-md-6">
                         <div class="card shadow-sm mb-4">
@@ -191,27 +191,27 @@
                             <div class="card-body">
                                 <div class="mb-3">
                                     <label for="studentfather" class="form-label">Father's Name <span class="text-danger">*</span></label>
-                                    <input type="text" name="fthname" id="studentfather" 
+                                    <input type="text" name="fthname" id="studentfather"
                                            class="form-control @error('fthname') is-invalid @enderror"
                                            value="{{ old('fthname') }}" required>
                                     @error('fthname')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="studentmother" class="form-label">Mother's Name <span class="text-danger">*</span></label>
-                                    <input type="text" name="mthname" id="studentmother" 
+                                    <input type="text" name="mthname" id="studentmother"
                                            class="form-control @error('mthname') is-invalid @enderror"
                                            value="{{ old('mthname') }}" required>
                                     @error('mthname')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="studentguardian" class="form-label">Guardian's Name</label>
-                                    <input type="text" name="guardname" id="studentguardian" 
+                                    <input type="text" name="guardname" id="studentguardian"
                                            class="form-control @error('guardname') is-invalid @enderror"
                                            value="{{ old('guardname') }}">
                                     @error('guardname')
@@ -221,7 +221,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Contact Information Card -->
                     <div class="col-md-6">
                         <div class="card shadow-sm mb-4">
@@ -231,14 +231,14 @@
                             <div class="card-body">
                                 <div class="mb-3">
                                     <label for="studentaddress" class="form-label">Address <span class="text-danger">*</span></label>
-                                    <textarea name="addr" id="studentaddress" rows="2" 
-                                              class="form-control @error('addr') is-invalid @enderror" 
+                                    <textarea name="addr" id="studentaddress" rows="2"
+                                              class="form-control @error('addr') is-invalid @enderror"
                                               required>{{ old('addr') }}</textarea>
                                     @error('addr')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <label for="studentpincode" class="form-label">Pincode</label>
@@ -249,7 +249,7 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                    
+
                                     <div class="col-md-4">
                                         <label for="studentmobile" class="form-label">Mobile No.</label>
                                         <input type="tel" name="mob" id="studentmobile" maxlength="10"
@@ -259,7 +259,7 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                    
+
                                     <div class="col-md-4">
                                         <label for="studentemail" class="form-label">Email</label>
                                         <input type="email" name="eml" id="studentemail"
@@ -273,7 +273,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Additional Information Card -->
                     <div class="col-12">
                         <div class="card shadow-sm mb-4">
@@ -295,7 +295,7 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                    
+
                                     <div class="col-md-3">
                                         <label for="cws" class="form-label">Is CWSN Child <span class="text-danger">*</span></label>
                                         <select name="cws" id="cws" class="form-select @error('cws') is-invalid @enderror" required>
@@ -307,7 +307,7 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                    
+
                                     <div class="col-md-3">
                                         <label for="nationality" class="form-label">Nationality <span class="text-danger">*</span></label>
                                         <select name="nationality" id="nationality" class="form-select @error('nationality') is-invalid @enderror" required>
@@ -319,10 +319,10 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                    
+
                                     <div class="col-md-3">
                                         <label for="remark" class="form-label">Remarks</label>
-                                        <input type="text" name="remark" id="remark" 
+                                        <input type="text" name="remark" id="remark"
                                                class="form-control @error('remark') is-invalid @enderror"
                                                value="{{ old('remark') }}">
                                         @error('remark')
@@ -330,25 +330,25 @@
                                         @enderror
                                     </div>
                                 </div>
-                                
+
                                 <div class="row g-3 mt-3">
                                     <div class="col-md-6">
                                         <label for="aadhaar" class="form-label">
-                                            Aadhaar Number 
-                                            <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
+                                            Aadhaar Number
+                                            <i class="fas fa-info-circle" data-bs-toggle="tooltip"
                                                title="12-digit number without spaces"></i>
                                         </label>
-                                        <input type="text" name="aadhaar" id="aadhaar" 
+                                        <input type="text" name="aadhaar" id="aadhaar"
                                                class="form-control @error('aadhaar') is-invalid @enderror"
                                                value="{{ old('aadhaar') }}" maxlength="12">
                                         @error('aadhaar')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                    
+
                                     <div class="col-md-6">
                                         <label for="apaar" class="form-label">Apaar ID</label>
-                                        <input type="text" name="apaar" id="apaar" 
+                                        <input type="text" name="apaar" id="apaar"
                                                class="form-control @error('apaar') is-invalid @enderror"
                                                value="{{ old('apaar') }}">
                                         @error('apaar')
@@ -360,7 +360,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Form Actions -->
                 <div class="d-flex justify-content-between mb-5">
                     <a href="{{ route('students.index') }}" class="btn btn-light btn-lg px-5">
@@ -386,7 +386,7 @@
             margin: 0 auto;
             padding: 2rem 1rem;
         }
-        
+
         /* Page header styles */
         .app-page-title {
             color: #3a0603;
@@ -394,11 +394,11 @@
             margin-bottom: 0.25rem;
             font-size: 1.75rem;
         }
-        
+
         .breadcrumb {
             font-size: 0.85rem;
         }
-        
+
         /* Card styling */
         .card {
             border: none;
@@ -406,25 +406,25 @@
             overflow: hidden;
             transition: all 0.3s ease;
         }
-        
+
         .card:hover {
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         .card-header {
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             font-weight: 600;
             padding: 0.75rem 1.25rem;
         }
-        
+
         .school-info-card {
             background-color: #fff;
         }
-        
+
         .school-info-card .card-header {
             background-color: #732bf5;
         }
-        
+
         /* Form inputs */
         .form-control, .form-select {
             border-radius: 0.5rem;
@@ -432,42 +432,42 @@
             padding: 0.75rem 1rem;
             transition: all 0.3s ease;
         }
-        
+
         .form-control:focus, .form-select:focus {
             border-color: #732bf5;
             box-shadow: 0 0 0 0.25rem rgba(115, 43, 245, 0.25);
         }
-        
+
         .form-control.is-invalid, .form-select.is-invalid {
             border-color: #dc3545;
             background-image: none;
         }
-        
+
         .form-floating>.form-control,
         .form-floating>.form-select {
             height: calc(3.5rem + 2px);
             padding: 1rem 0.75rem;
         }
-        
+
         .form-floating>label {
             padding: 1rem 0.75rem;
         }
-        
+
         /* Form feedback */
         .form-text {
             font-size: 0.75rem;
             color: #6c757d;
         }
-        
+
         .invalid-feedback {
             font-weight: 500;
         }
-        
+
         /* Required field marker */
         .text-danger {
             color: #dc3545;
         }
-        
+
         /* Notification system */
         .notification-container {
             position: fixed;
@@ -476,21 +476,21 @@
             z-index: 1050;
             max-width: 400px;
         }
-        
+
         .alert {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 0.5rem;
             border-left: 4px solid;
         }
-        
+
         .alert-success {
             border-left-color: #198754;
         }
-        
+
         .alert-danger {
             border-left-color: #dc3545;
         }
-        
+
         /* Buttons */
         .btn {
             border-radius: 0.5rem;
@@ -498,29 +498,29 @@
             padding: 0.75rem 1.5rem;
             transition: all 0.3s ease;
         }
-        
+
         .btn-primary {
             background-color: #732bf5;
             border-color: #732bf5;
         }
-        
+
         .btn-primary:hover, .btn-primary:focus {
             background-color: #5a1fcc;
             border-color: #5a1fcc;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Date picker styling */
         .date-picker-container {
             position: relative;
         }
-        
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .app-page-title {
                 font-size: 1.5rem;
             }
-            
+
             .btn-lg {
                 padding: 0.5rem 1rem;
                 font-size: 1rem;
@@ -537,34 +537,34 @@
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             });
-            
+
             // Date of birth formatter
             const dateRawInput = document.getElementById('dateraw');
             const dateInput = document.getElementById('date');
-            
+
             if (dateRawInput && dateInput) {
                 // Initialize with any existing value
                 if (dateRawInput.value) {
                     formatDate();
                 }
-                
+
                 dateRawInput.addEventListener('input', formatDate);
-                
+
                 function formatDate() {
                     const rawDate = dateRawInput.value;
                     const datePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;  // Regex to match dd/mm/yyyy format
-                    
+
                     // Check if the input matches the required pattern
                     if (datePattern.test(rawDate)) {
                         // Extract day, month, and year from the rawDate
                         const [ , day, month, year] = rawDate.match(datePattern);
-                        
+
                         // Convert to dd-mm-yyyy format
                         const formattedDate = `${day}-${month}-${year}`;
-                        
+
                         // Set the formatted date in the hidden field
                         dateInput.value = formattedDate;
-                        
+
                         // Remove the 'invalid' state if the pattern is correct
                         dateRawInput.setCustomValidity('');
                         dateRawInput.classList.remove('is-invalid');
@@ -576,7 +576,7 @@
                     }
                 }
             }
-            
+
             // Numeric input validation
             const numericInputs = document.querySelectorAll('#aadhaar, #studentmobile, #studentpincode');
             numericInputs.forEach(input => {
@@ -584,7 +584,7 @@
                     this.value = this.value.replace(/[^0-9]/g, '');
                 });
             });
-            
+
             // Form validation enhancement
             const form = document.getElementById('studentAddForm');
             if (form) {
@@ -592,23 +592,23 @@
                     if (!this.checkValidity()) {
                         event.preventDefault();
                         event.stopPropagation();
-                        
+
                         // Focus the first invalid field
                         const firstInvalidField = document.querySelector('.form-control:invalid, .form-select:invalid');
                         if (firstInvalidField) {
                             firstInvalidField.focus();
-                            
+
                             // Scroll to the first invalid field
                             const fieldBox = firstInvalidField.getBoundingClientRect();
                             const offset = window.pageYOffset + fieldBox.top - 100;
                             window.scrollTo({ top: offset, behavior: 'smooth' });
                         }
                     }
-                    
+
                     this.classList.add('was-validated');
                 });
             }
-            
+
             // Auto-dismiss alerts after 5 seconds
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {

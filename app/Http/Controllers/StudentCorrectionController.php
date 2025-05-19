@@ -59,42 +59,42 @@ class StudentCorrectionController extends Controller
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-    
+
         // If the username is not in Laravel session, try to get it from PHP session
         if (!$tid && isset($_SESSION['username'])) {
             $tid = $_SESSION['username'];
             // Store it in Laravel session for future use
             session(['username' => $tid]);
         }
-    
+
         if (!$tid) {
             return redirect()->route('login')->with('error', 'Session expired. Please login again.');
         }
-    
+
         // Get the school's UDISE code for the teacher
         $udise = $this->getSchoolUdiseCode($tid);
-    
+
         if (!$udise) {
             $user = Auth::user();
             $tch_data = tch_data::where('id', $user->id)->with('tch_profile')->first();
             $std_profile = $tch_data->tch_profile->first();
             $std_profile = Std_profile::where('udise_cd', $std_profile->udise_sch_code)
                 ->select('pres_class', 'udise_cd')->distinct()->get();
-    
+
             $schooldata = $tch_data->tch_profile->first();
             $schooldata = Schoolmaster::where('udise_sch_code', $schooldata->udise_sch_code)->get();
-    
+
             $tch_profile = tch_data::where('slno', $user->slno)->with('tch_profile')->first();
-    
+
             return view('vsk.frontend.dashboard', compact('user', 'tch_data', 'tch_profile', 'schooldata', 'std_profile'))
                 ->with('error', 'You are not assigned to any school.');
         }
-    
+
         // Initialize variables
         $selectedClass = $request->input('parameter2', null);
         $selectedSection = $request->input('sec', null);
         $searchTerm = $request->input('search', null); // Get search term from request
-    
+
         try {
             // Build the base query for students
             $query = DB::table('sms.student_profile as a')
@@ -138,7 +138,7 @@ class StudentCorrectionController extends Controller
                 )
                 ->where('a.udise_cd', $udise)
                 ->whereIn('a.stud_status', ['P', 'E']);
-    
+
             // Apply search filter if provided
             if ($searchTerm) {
                 $query->where(function($q) use ($searchTerm) {
@@ -148,38 +148,38 @@ class StudentCorrectionController extends Controller
                       ->orWhere('a.mother_name', 'ILIKE', "%{$searchTerm}%");
                 });
             }
-    
+
             // Apply class filter if selected
             if ($selectedClass !== null) {
                 $query->where('pres_class', (int)$selectedClass);
             }
-    
+
             // Apply section filter if selected and not "All Sections"
             if ($selectedSection !== null && $selectedSection != '0') {
                 $query->where('a.section_id', $selectedSection);
-    
+
                 // Add count of students per section
                 $query->addSelect(DB::raw('(select count(*) from sms.student_profile where udise_cd = a.udise_cd and pres_class = a.pres_class and section_id = a.section_id) as nos'));
             } else {
                 // Add count of students per class (for all sections or no filter)
                 $query->addSelect(DB::raw('(select count(*) from sms.student_profile where udise_cd = a.udise_cd and pres_class = a.pres_class) as nos'));
             }
-    
+
             // Sort by class and then by student name
             $query->orderBy('a.pres_class')->orderBy('a.student_name');
-    
+
             // Use pagination for 50 students per page
             // The appends() method preserves query parameters in pagination links
             $students = $query->paginate(50)->appends($request->except('page'));
-    
+
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'An error occurred while fetching student data: ' . $e->getMessage());
         }
-    
+
         // Fetch dropdown options for class and section
         $classOptions = $this->getClassOptions($udise);
         $sectionOptions = $this->getSectionOptions();
-    
+
         return view('students.correction', compact(
             'students',
             'classOptions',
@@ -318,7 +318,8 @@ class StudentCorrectionController extends Controller
 
     public function update(Request $request)
     {
-        $studentPen = $request->input('student_pen');
+        $originalStudentPen = $request->input('student_pen');
+        $newStudentPen = $request->input('new_student_pen', $originalStudentPen);
         // Get the teacher ID from session
         $tid = $this->getTeacherId();
 
@@ -361,39 +362,115 @@ class StudentCorrectionController extends Controller
             $apaar = !empty($validated['apaar']) ? $validated['apaar'] : null;
             $remark = !empty($validated['remark']) ? $validated['remark'] : null;
 
-            // Update student record
-            $updated = DB::table('sms.student_profile')
-                ->where('student_pen', $studentPen)
-                ->update([
-                    'gender' => $validated['gender'],
-                    'soc_cat_id' => $validated['category'],
-                    'cwsn_yn' => $validated['cwsn'],
+            // Check if student_pen is being updated
+            if ($newStudentPen !== $originalStudentPen) {
+                // First, check if the new student_pen already exists
+                $existingStudent = DB::table('sms.student_profile')
+                    ->where('student_pen', $newStudentPen)
+                    ->where('udise_cd', $udise)
+                    ->first();
+
+                if ($existingStudent) {
+                    return redirect()->route('students.correction')
+                        ->with('error', 'Cannot update: A student with the new PEN already exists.');
+                }
+
+                // Update the student_pen by creating a new record and deleting the old one
+                // First, get the original student record
+                $studentData = DB::table('sms.student_profile')
+                    ->where('student_pen', $originalStudentPen)
+                    ->where('udise_cd', $udise)
+                    ->first();
+
+                if (!$studentData) {
+                    return redirect()->route('students.correction')
+                        ->with('error', 'Student record not found.');
+                }
+
+                // Create a new array with all the student data including our updates
+                $newStudentData = [
+                    'student_pen' => $newStudentPen,
                     'student_name' => $validated['student_name'],
                     'father_name' => $validated['father_name'],
                     'mother_name' => $validated['mother_name'],
-                    'last_upd_date' => now(),
+                    'gender' => $validated['gender'],
                     'student_dob' => $validated['dob'],
                     'mobile_no_1' => $validated['mobile'],
+                    'cwsn_yn' => $validated['cwsn'],
                     'pres_class' => (int)$validated['class'],
                     'class_id' => (int)$validated['class'],
                     'section_id' => (int)$validated['section'],
                     'stud_status' => $validated['status'],
+                    'soc_cat_id' => $validated['category'],
                     'aadhaar_no' => $aadhaar,
                     'apaar_id' => $apaar,
                     'nationality' => $validated['nationality'],
-                    'remark' => $remark
-                ]);
+                    'remark' => $remark,
+                    'last_upd_date' => now(),
+                    'udise_cd' => $udise,
+                    // Copy any other fields from $studentData that need to be preserved
+                ];
 
-            if ($updated) {
+                // Start a transaction to ensure data consistency
+                DB::beginTransaction();
+
+                try {
+                    // Insert the new record
+                    $inserted = DB::table('sms.student_profile')->insert($newStudentData);
+
+                    // Delete the old record
+                    $deleted = DB::table('sms.student_profile')
+                        ->where('student_pen', $originalStudentPen)
+                        ->where('udise_cd', $udise)
+                        ->delete();
+
+                    if ($inserted && $deleted) {
+                        DB::commit();
+                        return redirect()->route('students.correction')
+                            ->with('success', "Student {$validated['student_name']} updated with new PEN successfully!");
+                    } else {
+                        DB::rollBack();
+                        return redirect()->route('students.correction')
+                            ->with('error', 'Failed to update student PEN.');
+                    }
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    return redirect()->route('students.correction')
+                        ->with('error', 'Error updating student PEN: ' . $e->getMessage());
+                }
+            } else {
+                // Regular update without changing student_pen
+                $updated = DB::table('sms.student_profile')
+                    ->where('student_pen', $originalStudentPen)
+                    ->update([
+                        'gender' => $validated['gender'],
+                        'soc_cat_id' => $validated['category'],
+                        'cwsn_yn' => $validated['cwsn'],
+                        'student_name' => $validated['student_name'],
+                        'father_name' => $validated['father_name'],
+                        'mother_name' => $validated['mother_name'],
+                        'last_upd_date' => now(),
+                        'student_dob' => $validated['dob'],
+                        'mobile_no_1' => $validated['mobile'],
+                        'pres_class' => (int)$validated['class'],
+                        'class_id' => (int)$validated['class'],
+                        'section_id' => (int)$validated['section'],
+                        'stud_status' => $validated['status'],
+                        'aadhaar_no' => $aadhaar,
+                        'apaar_id' => $apaar,
+                        'nationality' => $validated['nationality'],
+                        'remark' => $remark
+                    ]);
+
+                if ($updated) {
+                    return redirect()->route('students.correction')
+                        ->with('success', "Student {$validated['student_name']} updated successfully!");
+                }
+
                 return redirect()->route('students.correction')
-                    ->with('success', "Student {$validated['student_name']} updated successfully!");
+                    ->with('error', 'No changes were made to the student record.');
             }
-
-            return redirect()->route('students.correction')
-                ->with('error', 'No changes were made to the student record.');
-
         } catch (\Exception $e) {
-
             return redirect()->route('students.correction')
                 ->with('error', 'Error updating student: ' . $e->getMessage());
         }
@@ -403,7 +480,7 @@ class StudentCorrectionController extends Controller
     {
         // Get the student PEN from the request
         $studentPen = $request->input('student_pen');
-        
+
         // Get the teacher ID from session
         $tid = $this->getTeacherId();
 
@@ -451,7 +528,7 @@ class StudentCorrectionController extends Controller
                 ]);
 
             if ($updated) {
-                
+
                 return redirect()->back()
                     ->with('success', "Student {$validated['student_name']} updated successfully!");
             }

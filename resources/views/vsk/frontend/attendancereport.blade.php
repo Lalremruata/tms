@@ -68,7 +68,7 @@ function getSectionLetter($sectionId) {
         <span class="float-end">
             <button class="btn btn-primary" onclick="window.print()">PRINT</button>
             &nbsp;
-            <a name="" id="" class="btn btn-primary" href="{{route('openstudentattendance')}}" role="button">BACK</a>
+            <a name="" id="" class="btn btn-primary" href="{{route('students.attendance')}}" role="button">BACK</a>
         </span>
 
 

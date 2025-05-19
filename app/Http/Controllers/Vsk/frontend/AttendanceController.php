@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Vsk\frontend;
 use App\Http\Controllers\Controller;
+use App\Models\tch_data;
 use Illuminate\Http\Request;
 use App\Models\Session;
 use App\Models\tch_profile;
@@ -20,6 +21,80 @@ class AttendanceController extends Controller
     public function showDashboard()
     {
         return view('vsk.frontend.dashboard');
+    }
+
+    public function index()
+    {
+
+        $user=Auth::user();
+
+        $tch_data=tch_data::where('id',$user->id)->with('tch_profile')->first();
+        $std_profile= $tch_data->tch_profile->first();
+        // return $std_profile->udise_sch_code;
+        $std_profile=Std_profile::where('udise_cd',$std_profile->udise_sch_code)->select('pres_class','udise_cd','section_id')->where('stud_status','E')->distinct()->orderBy('pres_class')->get();
+//  return $std_profile;
+        $filteredData = [];
+        $currentDate = date('Y-m-d');
+        $filteredData = [];
+
+        foreach ($std_profile as $profile) {
+            $exists = student_attendance::where('date', $currentDate)
+                ->where('udise_cd', $profile['udise_cd'])
+                ->where('class_id', $profile['pres_class'])
+                ->where('section_id', $profile['section_id'])
+                ->exists();
+
+            // Add 'status' key based on existence
+            if ($exists) {
+                $profile['status'] = 1;
+                $present=student_attendance::where('date', $currentDate)
+                    ->where('udise_cd', $profile['udise_cd'])
+                    ->where('class_id', $profile['pres_class'])
+                    ->where('section_id', $profile['section_id'])
+                    ->where('status','true')
+                    ->count();
+
+                $absent=student_attendance::where('date', $currentDate)
+                    ->where('udise_cd', $profile['udise_cd'])
+                    ->where('class_id', $profile['pres_class'])
+                    ->where('section_id', $profile['section_id'])
+                    ->where('status','false')
+                    ->count();
+
+                $profile['present'] = $present;
+                $profile['absent'] = $absent;
+
+            } else {
+                $profile['status'] = 0;
+            }
+
+            $filteredData[] = $profile;
+        }
+
+        $std_profile1 = $filteredData;
+        // return $std_profile1;
+
+        foreach($std_profile1 as $count)
+        {
+            if($count->status==1)
+            {
+                $presab= student_attendance::where('data', $currentDate)
+                    ->where('udise_cd', $profile['udise_cd'])
+                    ->where('class_id', $profile['pres_class'])
+                    ->where('section_id', $profile['section_id']);
+            }
+        }
+
+
+        $schooldata= $tch_data->tch_profile->first();
+        $schooldata = Schoolmaster::where('udise_sch_code',$schooldata->udise_sch_code)->get();
+        // return $schooldata;
+
+        // $schoollist=Schoolmaster::select('udise_sch_code', 'school_name')->get();
+
+        $tch_profile=tch_data::where('slno',$user->slno)->with('tch_profile')->first();
+
+        return view('students.attendance-dashboard',compact('user','tch_data','tch_profile','schooldata','std_profile','std_profile1')); // Pass the user to the view
     }
 
     public function fetchAttendanceData(Request $request)
@@ -96,7 +171,7 @@ class AttendanceController extends Controller
             $name= tch_profile::where('slno',$name)->select('tch_name')->get();
             $name = $name[0]['tch_name'];
 
-            return redirect()->route('openstudentattendance')->with([
+            return redirect()->route('students.attendance')->with([
                 'message' => "Attendance Already Submitted for Today By: $name",
                 'updateSuccess' => false
             ]);
@@ -130,7 +205,7 @@ class AttendanceController extends Controller
         }
         // Redirect or return a response
         // return redirect()->back()->with(['message' => 'Attendance Submitted successfully.', 'updateSuccess' => true]);
-        return redirect()->route('openstudentattendance')->with(['message' => 'Attendance Submitted successfully.', 'updateSuccess' => true]);
+        return redirect()->route('students.attendance')->with(['message' => 'Attendance Submitted successfully.', 'updateSuccess' => true]);
 
     }
 

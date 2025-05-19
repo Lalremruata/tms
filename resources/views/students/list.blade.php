@@ -25,13 +25,13 @@
                     <h1 class="app-page-title">Student List</h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('vskdashboard') }}">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Students</li>
                         </ol>
                     </nav>
                 </div>
                 <div>
-                    <a href="{{ route('dashboard') }}" class="btn btn-outline-primary me-2">
+                    <a href="{{ route('vskdashboard') }}" class="btn btn-outline-primary me-2">
                         <i class="fas fa-home me-2"></i>Dashboard
                     </a>
                     <a href="{{ route('students.add') }}" class="btn btn-primary">
@@ -174,7 +174,7 @@
             margin: 0 auto;
             padding: 2rem 1rem;
         }
-        
+
         /* Page header styles */
         .app-page-title {
             color: #3a0603;
@@ -182,11 +182,11 @@
             margin-bottom: 0.25rem;
             font-size: 1.75rem;
         }
-        
+
         .breadcrumb {
             font-size: 0.85rem;
         }
-        
+
         /* Card styling */
         .card {
             border: none;
@@ -194,30 +194,30 @@
             overflow: hidden;
             transition: all 0.3s ease;
         }
-        
+
         .card:hover {
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         .card-header {
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             font-weight: 600;
             padding: 0.75rem 1.25rem;
         }
-        
+
         .school-info-card {
             background-color: #fff;
         }
-        
+
         .school-info-card .card-header {
             background-color: #732bf5;
         }
-        
+
         /* Table styling */
         .student-table {
             margin-bottom: 0;
         }
-        
+
         .student-table thead th {
             background-color: #f8f9fa;
             border-bottom: 2px solid #dee2e6;
@@ -226,40 +226,40 @@
             vertical-align: middle;
             white-space: nowrap;
         }
-        
+
         .student-table tbody td {
             padding: 0.75rem;
             vertical-align: middle;
         }
-        
+
         .student-table tbody tr:hover {
             background-color: rgba(115, 43, 245, 0.05);
         }
-        
+
         /* Badge styling */
         .badge {
             font-weight: 500;
             padding: 0.5em 0.8em;
         }
-        
+
         /* Button styling */
         .btn {
             border-radius: 0.5rem;
             font-weight: 600;
             transition: all 0.3s ease;
         }
-        
+
         .btn-primary {
             background-color: #732bf5;
             border-color: #732bf5;
         }
-        
+
         .btn-primary:hover, .btn-primary:focus {
             background-color: #5a1fcc;
             border-color: #5a1fcc;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Empty state styling */
         .empty-state {
             display: flex;
@@ -268,7 +268,7 @@
             justify-content: center;
             padding: 2rem;
         }
-        
+
         /* Notification system */
         .notification-container {
             position: fixed;
@@ -277,17 +277,17 @@
             z-index: 1050;
             max-width: 400px;
         }
-        
+
         .alert {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 0.5rem;
             border-left: 4px solid;
         }
-        
+
         .alert-success {
             border-left-color: #198754;
         }
-        
+
         .alert-danger {
             border-left-color: #dc3545;
         }
@@ -296,37 +296,37 @@
                 .pagination {
             margin-bottom: 0;
         }
-        
+
         .pagination .page-item .page-link {
             border-radius: 0.5rem;
             margin: 0 0.125rem;
             color: #732bf5;
             transition: all 0.2s ease;
         }
-        
+
         .pagination .page-item.active .page-link {
             background-color: #732bf5;
             border-color: #732bf5;
             color: white;
         }
-        
+
         .pagination .page-item .page-link:hover {
             background-color: rgba(115, 43, 245, 0.1);
         }
-        
+
         .pagination .page-item.disabled .page-link {
             color: #6c757d;
             pointer-events: none;
             background-color: #fff;
             border-color: #dee2e6;
         }
-        
+
         .card-footer {
             background-color: #f8f9fa;
             border-top: 1px solid rgba(0, 0, 0, 0.1);
             padding: 0.75rem 1.25rem;
         }
-        
+
         /* Responsive adjustments */
         @media (max-width: 992px) {
             .card-header {
@@ -334,12 +334,12 @@
                 align-items: flex-start;
             }
         }
-        
+
         @media (max-width: 768px) {
             .app-page-title {
                 font-size: 1.5rem;
             }
-            
+
             .btn-lg {
                 padding: 0.5rem 1rem;
                 font-size: 1rem;
@@ -356,7 +356,7 @@
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             });
-            
+
             // Auto-dismiss alerts after 5 seconds
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {

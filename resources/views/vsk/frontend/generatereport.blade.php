@@ -9,7 +9,7 @@
      <h4 class="card-title bg-info p-3 fs-4 text-white">SELECT DATE YOU WANT TO GENERATE REPORTS</h4>
 
      <span class="float-end">
-        <a name="" id="" class="btn btn-primary" href="{{route('openstudentattendance')}}" role="button">BACK</a>
+        <a name="" id="" class="btn btn-primary" href="{{route('students.attendance')}}" role="button">BACK</a>
      </span>
 
 

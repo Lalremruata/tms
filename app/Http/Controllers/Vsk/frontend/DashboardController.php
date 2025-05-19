@@ -40,7 +40,7 @@ class DashboardController extends Controller
     }
     public function openstudentattendance()
     {
-      
+
         $user=Auth::user();
 
         $tch_data=tch_data::where('id',$user->id)->with('tch_profile')->first();
@@ -115,7 +115,7 @@ class DashboardController extends Controller
     {
         $user=Auth::user();
         $_SESSION['username'] = $user->slno;
-         
+
         $user=tch_data::where('id',$user->id)->with('tch_profile')->first();
         $user= $user->tch_profile->first();
         return view('vsk.frontend.profile',compact('user'));
@@ -178,7 +178,7 @@ class DashboardController extends Controller
                 }
                 else
                 {
-                   
+
                     $user = Auth::user();
                     $_SESSION['username'] = $user->slno;
                     $userProfile = tch_data::find($user->id); // Assuming `id` is the primary key
@@ -289,7 +289,7 @@ class DashboardController extends Controller
         return view('vsk.frontend.stddbb', compact('profiles'));
     }
 
-   
+
       // MarkAttendance
     public function markAttendance(Request $request)
     {

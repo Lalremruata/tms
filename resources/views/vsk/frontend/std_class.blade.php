@@ -41,7 +41,7 @@
 
 
         <span class="float-end">
-        <a name="" id="" class="btn btn-primary" href="{{route('openstudentattendance')}}" role="button">BACK</a>
+        <a name="" id="" class="btn btn-primary" href="{{route('students.attendance')}}" role="button">BACK</a>
 
         </span>
 
@@ -51,8 +51,8 @@
  <div class="card border-primary">
    <div class="card-body">
      <h4 class="card-title bg-info p-3 fs-4 text-white">STUDENT'S  ATTENDANCE FOR :
-{{ date('j F, Y') }} 
-    
+{{ date('j F, Y') }}
+
 </h4>
      <p class="card-text">
 
@@ -65,7 +65,7 @@
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Student Name</th>
-                        <th scope="col">Father Name</th>  
+                        <th scope="col">Father Name</th>
                         <th scope="col">Action</th>
                     </tr>
                 </thead>
@@ -74,7 +74,7 @@
                     <tr>
                         <td scope="row">{{ $loop->iteration }}</td>
                         <td>{{ trim($item->student_name) }}</td>
-                        <td>{{ $item->father_name }}</td>  
+                        <td>{{ $item->father_name }}</td>
                         <td>
                             <div class="form-check form-switch form-switch-custom form-switch-danger mb-3">
                                 <input class="form-check-input" name="attendance[{{ $loop->index }}][checked]" type="checkbox" role="switch" id="SwitchCheck{{ $loop->iteration }}" checked onchange="updateHiddenInputs(this, '{{ $item->student_pen }}', '{{ $item->udise_cd }}', '{{ $item->pres_class }}', '{{ $loop->index }}')">

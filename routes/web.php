@@ -70,7 +70,8 @@ Route::middleware([CustomRedirectIfAuthenticated::class])->group(function () {
     Route::post('/submitatt', [AttendanceController::class, 'submitatt'])->name('submitatt');
 
     // mark Attendances
-    Route::get('/openstudentattendance', [DashboardController::class, 'openstudentattendance'])->name('openstudentattendance');
+//    Route::get('/openstudentattendance', [DashboardController::class, 'openstudentattendance'])->name('openstudentattendance');
+    Route::get('/student-attendance', [AttendanceController::class, 'index'])->name('students.attendance');
 
 
     Route::get('/generatereport/{id}/{udise}/{section_id}', [AttendanceController::class, 'generatereport'])->name('generatereport');
