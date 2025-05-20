@@ -53,17 +53,17 @@
 
                         <div class="col-md-6">
                             <label for="student_name" class="form-label fw-bold">Student Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="student_name" name="student_name" value="{{ $student->student_name }}" required>
+                            <input type="text" class="form-control" id="student_name" name="student_name" value="{{ trim($student->student_name) }}" required>
                         </div>
 
                         <div class="col-md-6">
                             <label for="father_name" class="form-label fw-bold">Father's Name</label>
-                            <input type="text" class="form-control" id="father_name" name="father_name" value="{{ $student->father_name }}">
+                            <input type="text" class="form-control" id="father_name" name="father_name" value="{{ trim($student->father_name) }}">
                         </div>
 
                         <div class="col-md-6">
                             <label for="mother_name" class="form-label fw-bold">Mother's Name</label>
-                            <input type="text" class="form-control" id="mother_name" name="mother_name" value="{{ $student->mother_name }}">
+                            <input type="text" class="form-control" id="mother_name" name="mother_name" value="{{ trim($student->mother_name) }}">
                         </div>
 
                         <div class="col-md-3">
@@ -116,14 +116,14 @@
 
                         <div class="col-md-4">
                             <label for="status" class="form-label fw-bold">Status <span class="text-danger">*</span></label>
-                            <select class="form-select" id="status" name="status" required>
-                                <option value="E" {{ $student->stud_status == 'E' ? 'selected' : '' }}>Enrolled</option>
-                                <option value="W" {{ $student->stud_status == 'W' ? 'selected' : '' }}>Wrong Entry</option>
-                                <option value="T" {{ $student->stud_status == 'T' ? 'selected' : '' }}>Taken TC</option>
-                                <option value="A" {{ $student->stud_status == 'A' ? 'selected' : '' }}>Long Absentees</option>
-                                <option value="D" {{ $student->stud_status == 'D' ? 'selected' : '' }}>Demised</option>
-                                <option value="P" {{ $student->stud_status == 'P' ? 'selected' : '' }}>Pending</option>
-                                <option value="O" {{ $student->stud_status == 'O' ? 'selected' : '' }}>Passed Out</option>
+                            <select class="form-select" id="status" name="status" required data-container="body">
+                                <option value="E" {{ trim($student->stud_status) == 'E' ? 'selected' : '' }}>Enrolled</option>
+                                <option value="W" {{ trim($student->stud_status) == 'W' ? 'selected' : '' }}>Wrong Entry</option>
+                                <option value="T" {{ trim($student->stud_status) == 'T' ? 'selected' : '' }}>Taken TC</option>
+                                <option value="A" {{ trim($student->stud_status) == 'A' ? 'selected' : '' }}>Long Absentees</option>
+                                <option value="D" {{ trim($student->stud_status) == 'D' ? 'selected' : '' }}>Demised</option>
+                                <option value="P" {{ trim($student->stud_status) == 'P' ? 'selected' : '' }}>Pending</option>
+                                <option value="O" {{ trim($student->stud_status) == 'O' ? 'selected' : '' }}>Passed Out</option>
                             </select>
                         </div>
 
@@ -212,6 +212,10 @@
                 border-radius: 4px;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-out 2.5s forwards;
+            }
+            .form-select {
+                width: 100% !important;
+                max-width: 100% !important;
             }
 
             @keyframes slideIn {

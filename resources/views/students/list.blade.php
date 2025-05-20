@@ -66,11 +66,6 @@
                             <span class="fw-bold fs-5">{{ $schoolInfo->school_name }}</span>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-end mt-3">
-                        <a href="{{ route('students.export') }}" class="btn btn-success">
-                            <i class="fas fa-file-excel me-2"></i>Export to Excel
-                        </a>
-                    </div>
                 </div>
             </div>
         @else
@@ -82,15 +77,18 @@
         <!-- Student List Card -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light">
-                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Student Records</h5>
+                <a href="{{ route('students.export')}}"
+                   class="btn btn-sm btn-success">
+                    <i class="ri-file-excel-line me-1"></i> Export to Excel
+                </a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover student-table mb-0">
                         <thead>
                             <tr>
-                                <th class="text-center">Student Code</th>
                                 <th class="text-center">Student PEN</th>
+                                <th class="text-center">Apaar id</th>
                                 <th>Student Name</th>
                                 <th class="text-center">Gender</th>
                                 <th class="text-center">Date of Birth</th>
@@ -105,8 +103,8 @@
                         <tbody>
                             @forelse($students as $student)
                                 <tr>
-                                    <td class="text-center">{{ $student->userid }}</td>
                                     <td class="text-center">{{ $student->student_pen ?? '-' }}</td>
+                                    <td class="text-center">{{ $student->apaar_id ?? '-' }}</td>
                                     <td>{{ $student->student_name }}</td>
                                     <td class="text-center">
                                         @if($student->gender == 'Male')

@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo('/');
 
         // Using a closure...
-        $middleware->redirectGuestsTo(fn (Request $request) => route('vsklogin'));
+        $middleware->redirectGuestsTo(fn (Request $request) => route('vskloginget'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

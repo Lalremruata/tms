@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Schoolmaster;
+use App\Models\Std_profile;
+use App\Models\tch_data;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Teacher;
 use App\Models\School;
@@ -12,7 +16,51 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
-    public function index()
+    public function index(){
+        $user=Auth::user();
+        $tch_data=tch_data::where('id',$user->id)->with('tch_profile')->first();
+        $std_profile= $tch_data->tch_profile->first();
+        // return $std_profile->udise_sch_code;
+        $schoolInfo = DB::table('mizoram115.school_master as a')
+            ->join('mizoram115.mst_district as b', 'a.district_cd', '=', 'b.udise_district_code')
+            ->join('mizoram115.mst_block as c', 'a.block_cd', '=', 'c.udise_block_code')
+            ->select(
+                'a.district_cd',
+                'c.udise_block_code',
+                'b.district_name',
+                'a.sch_category_id as schcat',
+                'a.sch_mgmt_id as schmgmt',
+                'a.sch_type',
+                'c.block_name',
+                'a.school_name',
+                'a.udise_sch_code'
+            )
+            ->where('a.udise_sch_code', $std_profile->udise_sch_code)
+            ->first();
+        // Count by class
+        $std_by_class = Std_profile::where('udise_cd', $std_profile->udise_sch_code)
+            ->where('stud_status', 'E')
+            ->select('udise_cd','class_id', 'section_id', DB::raw('count(*) as student_count'))
+            ->groupBy('class_id', 'section_id', 'udise_cd')
+            ->orderBy('class_id')
+            ->orderBy('section_id')
+            ->get();
+
+        // Get total count
+        $total_students = Std_profile::where('udise_cd', $std_profile->udise_sch_code)
+            ->where('stud_status', 'E')
+            ->count();
+
+        $schooldata= $tch_data->tch_profile->first();
+        $schooldata = Schoolmaster::where('udise_sch_code',$schooldata->udise_sch_code)->get();
+        // return $schooldata;
+
+        // $schoollist=Schoolmaster::select('udise_sch_code', 'school_name')->get();
+
+
+        return view('students.class-list',compact('user','tch_data', 'schooldata','std_by_class', 'schoolInfo','total_students'));
+    }
+    public function allStudents()
     {
         // Get the username from session instead of Auth::id()
         $tid = session('username');
@@ -155,31 +203,105 @@ class StudentController extends Controller
         );
     }
 
+    public function exportExcelByClassSection($udiseCode, $classId, $sectionId)
+    {
+        // Validate the parameters
+        if (empty($udiseCode) || $classId === null || $sectionId === null) {
+            return redirect()->back()->with('error', 'Invalid parameters provided');
+        }
+
+        // Get school info for the filename
+        $schoolName = DB::table('mizoram115.school_master')
+            ->where('udise_sch_code', $udiseCode)
+            ->value('school_name');
+
+        // Get class name and sanitize it
+        $className = $this->getClassName($classId);
+        $classNameSafe = $this->sanitizeFilename($className);
+
+        // Get section name
+        $sectionName = chr(64 + (int)$sectionId); // 1 -> A, 2 -> B, etc.
+
+        // Clean up the school name for use in a filename
+        $schoolSlug = $this->sanitizeFilename($schoolName ?? 'school');
+        $fileName = $schoolSlug . '_class_' . $classNameSafe . '_section_' . $sectionName . '_' . date('Y-m-d') . '.xlsx';
+
+        // Use the Laravel Excel package to create and download the Excel file
+        return Excel::download(
+            new StudentsExport($udiseCode, $classId, $sectionId),
+            $fileName
+        );
+    }
+
     /**
      * Sanitize a string to make it safe for use in filenames
-     * 
+     *
      * @param string $string The string to sanitize
      * @return string The sanitized string
      */
+
+    public function getStudentsByClassSection($udise_cd, $class_id, $section_id)
+    {
+        $students = Std_profile::where('udise_cd', $udise_cd)
+            ->where('class_id', $class_id)
+            ->where('section_id', $section_id)
+            ->where('stud_status', 'E')
+            ->get();
+
+        $className = $this->getClassName($class_id);
+        $sectionName = $this->getSectionName($section_id);
+
+        return view('students.by-class-section', [
+            'students' => $students,
+            'class_name' => $className,
+            'section_name' => $sectionName,
+            'udise_cd' => $udise_cd,
+            'class_id' => $class_id,
+            'section_id' => $section_id
+        ]);
+    }
     private function sanitizeFilename($string)
     {
-        // Remove any character that isn't a letter, number, dash, or underscore
-        $string = preg_replace('/[^\w\d-]/', '_', $string);
-        
-        // Replace multiple consecutive underscores with a single one
-        $string = preg_replace('/_+/', '_', $string);
-        
-        // Convert to lowercase
-        $string = strtolower($string);
-        
-        // Trim underscores from the beginning and end
-        $string = trim($string, '_');
-        
-        // If string is empty after sanitizing, provide a default
-        if (empty($string)) {
-            $string = 'school';
-        }
-        
+        // Remove any characters that are invalid in filenames
+        $string = preg_replace('/[\/\?<>\\:\*\|"]/', '', $string);
+        // Replace spaces with underscores
+        $string = str_replace(' ', '_', $string);
+        // Remove any other potentially problematic characters
+        $string = preg_replace('/[^A-Za-z0-9_\-\.]/', '', $string);
+        // Ensure filename isn't too long
+        $string = substr($string, 0, 100);
+
         return $string;
+    }
+
+    private function getClassName($class_id)
+    {
+        $classNames = [
+            '-3' => 'Nursery/KG/PP3',
+            '-2' => 'LKG/KG1/PP2',
+            '-1' => 'UKG/KG2/PP1',
+            '1' => '1',
+            '2' => '2',
+            '3' => '3',
+            '4' => '4',
+            '5' => '5',
+            '6' => '6',
+            '7' => '7',
+            '8' => '8',
+            '9' => '9',
+            '10' => '10',
+            '11' => '11',
+            '12' => '12'
+        ];
+
+        return $classNames[$class_id] ?? $class_id;
+    }
+    private function getSectionName($section_id)
+    {
+        // Convert numeric section_id to letter (1 -> A, 2 -> B, etc.)
+        if ($section_id >= 1 && $section_id <= 26) {
+            return chr(64 + $section_id); // ASCII: 65 = 'A', so 1+64 = 65 = 'A'
+        }
+        return $section_id;
     }
 }

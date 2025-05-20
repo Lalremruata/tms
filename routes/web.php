@@ -81,7 +81,11 @@ Route::middleware([CustomRedirectIfAuthenticated::class])->group(function () {
 // Student List Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+    Route::get('/students/all', [StudentController::class, 'allStudents'])->name('students.all');
+    Route::get('/students/{udise_cd}/{class_id}/{section_id}', [StudentController::class, 'getStudentsByClassSection'])->name('students.by-class-section');
     Route::get('/students/export', [StudentController::class, 'exportExcel'])->name('students.export');
+    Route::get('/students/export-class-section/{udiseCode}/{classId}/{sectionId}', [StudentController::class, 'exportExcelByClassSection'])
+        ->name('students.export-by-class-section');
 
     Route::get('/students/add', [StudentAddController::class, 'index'])->name('students.add');
 

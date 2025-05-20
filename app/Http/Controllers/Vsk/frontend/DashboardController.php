@@ -10,6 +10,7 @@ use App\Models\tch_profile;
 use App\Models\tch_profile_update;
 use App\Models\Schoolmaster;
 use App\Models\student_profile;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Std_profile;
 use App\Models\student_attendance;
@@ -23,7 +24,19 @@ class DashboardController extends Controller
         $tch_data=tch_data::where('id',$user->id)->with('tch_profile')->first();
         $std_profile= $tch_data->tch_profile->first();
         // return $std_profile->udise_sch_code;
-        $std_profile=Std_profile::where('udise_cd',$std_profile->udise_sch_code)->select('pres_class','udise_cd')->distinct()->get();
+        // Count by class
+        $std_by_class = Std_profile::where('udise_cd', $std_profile->udise_sch_code)
+            ->where('stud_status', 'E')
+            ->select('udise_cd','class_id', 'section_id', DB::raw('count(*) as student_count'))
+            ->groupBy('class_id', 'section_id', 'udise_cd')
+            ->orderBy('class_id')
+            ->orderBy('section_id')
+            ->get();
+
+        // Get total count
+        $total_students = Std_profile::where('udise_cd', $std_profile->udise_sch_code)
+            ->where('stud_status', 'E')
+            ->count();
 
         $schooldata= $tch_data->tch_profile->first();
         $schooldata = Schoolmaster::where('udise_sch_code',$schooldata->udise_sch_code)->get();
@@ -36,7 +49,7 @@ class DashboardController extends Controller
 
 
 
-        return view('vsk.frontend.dashboard',compact('user','tch_data','tch_profile','schooldata','std_profile')); // Pass the user to the view
+        return view('vsk.frontend.dashboard',compact('user','tch_data','tch_profile','schooldata','std_by_class', 'total_students')); // Pass the user to the view
     }
     public function openstudentattendance()
     {

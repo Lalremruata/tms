@@ -6,24 +6,29 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class StudentsExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
 {
     protected $udiseCode;
+    protected $classId;
+    protected $sectionId;
     protected $schoolInfo;
 
     /**
      * Create a new export instance.
      *
      * @param string $udiseCode
+     * @param int|null $classId
+     * @param int|null $sectionId
      * @return void
      */
-    public function __construct(string $udiseCode)
+    public function __construct(string $udiseCode, $classId = null, $sectionId = null)
     {
         $this->udiseCode = $udiseCode;
+        $this->classId = $classId;
+        $this->sectionId = $sectionId;
 
         // Get school information
         $this->schoolInfo = DB::table('mizoram115.school_master as a')
@@ -44,10 +49,10 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, Shoul
      */
     public function collection()
     {
-        return DB::table('sms.student_profile as a')
+        $query = DB::table('sms.student_profile as a')
             ->select(
-                'a.userid',
                 'a.student_pen',
+                'a.apaar_id',
                 'a.student_name',
                 DB::raw("CASE
                     WHEN gender = '1' THEN 'Male'
@@ -93,8 +98,20 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, Shoul
                 END as status")
             )
             ->where('a.udise_cd', $this->udiseCode)
-            ->whereRaw("a.stud_status IN ('E', 'P')")
-            ->orderBy('a.pres_class')
+            ->whereRaw("a.stud_status IN ('E', 'P')");
+
+        // Apply class filter if provided
+        if ($this->classId !== null) {
+            $query->where('a.pres_class', $this->classId);
+        }
+
+        // Apply section filter if provided
+        if ($this->sectionId !== null) {
+            $query->where('a.section_id', $this->sectionId);
+        }
+
+        return $query->orderBy('a.pres_class')
+            ->orderBy('a.section_id')
             ->orderBy('a.student_name')
             ->get();
     }
@@ -106,8 +123,8 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, Shoul
     {
         // Map the student data to the row values
         return [
-            $student->userid,
             $student->student_pen ?? '',
+            $student->apaar_id ?? '',
             $student->student_name,
             $student->gender,
             $student->student_dob,
@@ -126,8 +143,8 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, Shoul
     public function headings(): array
     {
         return [
-            'Student Code (Temporary)',
             'Student PEN',
+            'Apaar Id',
             'Student Name',
             'Gender',
             'Date of Birth',
@@ -139,44 +156,4 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, Shoul
             'Status'
         ];
     }
-
-    /**
-     * @param Worksheet $sheet
-     */
-//    public function styles(Worksheet $sheet)
-//    {
-//        // Add school information headers
-//        $sheet->mergeCells('A1:K1');
-//        $sheet->setCellValue('A1', 'Student List');
-//
-//        $sheet->mergeCells('A2:K2');
-//        $sheet->setCellValue('A2', 'School: ' . ($this->schoolInfo->school_name ?? 'N/A'));
-//
-//        $sheet->mergeCells('A3:K3');
-//        $sheet->setCellValue('A3', 'District: ' . ($this->schoolInfo->district_name ?? 'N/A') . ' | Block: ' . ($this->schoolInfo->block_name ?? 'N/A') . ' | UDISE Code: ' . ($this->schoolInfo->udise_sch_code ?? 'N/A'));
-//
-//        $sheet->mergeCells('A4:K4');
-//        $sheet->setCellValue('A4', 'Generated on: ' . now()->format('d-m-Y H:i:s'));
-//
-//        // Style the headers and school info
-//        $sheet->getStyle('A1:K1')->getFont()->setBold(true)->setSize(14);
-//        $sheet->getStyle('A2:K4')->getFont()->setBold(true);
-//        $sheet->getStyle('A5:K5')->getFont()->setBold(true);
-//
-//        // Add background color to the header row
-//        $sheet->getStyle('A5:K5')->getFill()
-//            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-//            ->getStartColor()->setRGB('4CAF50');
-//
-//        $sheet->getStyle('A5:K5')->getFont()->getColor()->setRGB('FFFFFF');
-//
-//        // Auto-fit columns
-//        foreach(range('A', 'K') as $column) {
-//            $sheet->getColumnDimension($column)->setAutoSize(true);
-//        }
-//
-//        return [
-//            5 => ['font' => ['bold' => true]],
-//        ];
-//    }
 }

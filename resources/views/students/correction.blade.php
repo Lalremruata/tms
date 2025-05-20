@@ -49,12 +49,12 @@
                             <label for="search" class="form-label fw-bold">Search Students</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                <input type="text" class="form-control" id="search" name="search" 
-                                       placeholder="Name or PEN..." 
+                                <input type="text" class="form-control" id="search" name="search"
+                                       placeholder="Name or PEN..."
                                        value="{{ $searchTerm ?? '' }}">
                             </div>
                         </div>
-                        
+
                         <!-- Class dropdown -->
                         <div class="col-md-3">
                             <label for="parameter2" class="form-label fw-bold">Class</label>
@@ -67,7 +67,7 @@
                                 @endforeach
                             </select>
                         </div>
-            
+
                         <!-- Section dropdown -->
                         <div class="col-md-3">
                             <label for="sec" class="form-label fw-bold">Section</label>
@@ -82,14 +82,14 @@
                                 @endforeach
                             </select>
                         </div>
-            
+
                         <!-- Action buttons -->
                         <div class="col-md-3 d-flex align-items-end">
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-filter me-1"></i> Apply
                                 </button>
-            
+
                                 <a href="{{ route('students.correction') }}" class="btn btn-secondary">
                                     <i class="fas fa-redo"></i> Reset
                                 </a>
@@ -121,7 +121,7 @@
                                     </span>
                                 @endif
                             </div>
-                        
+
                             <!-- Client-side filter for current page -->
                             <div class="search-box">
                                 <div class="input-group">
@@ -148,11 +148,11 @@
                                     <th>Student PEN</th>
                                     <th>Student Name</th>
                                     <th>Status</th>
-                                    <th>Category</th>
-                                    <th>Aadhaar Number</th>
-                                    <th>Apaar ID</th>
-                                    <th>Nationality</th>
-                                    <th>Remark</th>
+{{--                                    <th>Category</th>--}}
+{{--                                    <th>Aadhaar Number</th>--}}
+{{--                                    <th>Apaar ID</th>--}}
+{{--                                    <th>Nationality</th>--}}
+{{--                                    <th>Remark</th>--}}
                                     <th>Action</th>
                                 </tr>
                                 </thead>
@@ -167,14 +167,13 @@
                                     <form action="{{ route('students.update-inline') }}" method="POST" class="student-update-form">
                                         @csrf
                                         <input type="hidden" name="student_pen" value="{{ $row->student_pen }}">
-                                        
+
                                         <td>{{ $slno }}</td>
                                         <td>
                                             <span class="student-pen">{{ $row->student_pen }}</span>
                                         </td>
                                         <td>
-                                            <input class="form-control form-control-sm wide-field" type="text" 
-                                                   name="student_name" value="{{ $row->student_name }}" required>
+                                            <span class="student_name">{{ $row->student_name }} </span>
                                         </td>
                                         <td>
                                             <select class="form-select form-select-sm narrow-field status-select"
@@ -189,36 +188,36 @@
                                                 <option value="O" {{ $row->stud_status == 'O' ? 'selected' : '' }}>Passed Out</option>
                                             </select>
                                         </td>
-                                        <td>
-                                            <select class="form-select form-select-sm narrow-field"
-                                                    name="category" required>
-                                                <option value="1" {{ $row->soc_cat_id == '1' ? 'selected' : '' }}>SC</option>
-                                                <option value="2" {{ $row->soc_cat_id == '2' ? 'selected' : '' }}>ST</option>
-                                                <option value="3" {{ $row->soc_cat_id == '3' ? 'selected' : '' }}>OBC</option>
-                                                <option value="4" {{ $row->soc_cat_id == '4' ? 'selected' : '' }}>General</option>
-                                                <option value="5" {{ $row->soc_cat_id == '5' ? 'selected' : '' }}>Others</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input class="form-control form-control-sm medium-field" type="text" maxlength="12"
-                                                   name="aadhaar" value="{{ $row->aadhaar_no ?? '' }}"
-                                                   oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 12)">
-                                        </td>
-                                        <td>
-                                            <input class="form-control form-control-sm medium-field" type="text"
-                                                   name="apaar" value="{{ $row->apaar_id ?? '' }}">
-                                        </td>
-                                        <td>
-                                            <select class="form-select form-select-sm narrow-field"
-                                                    name="nationality">
-                                                <option value="Indian" {{ ($row->nationality == 'Indian' || empty($row->nationality)) ? 'selected' : '' }}>Indian</option>
-                                                <option value="Foreigner" {{ ($row->nationality == 'Foreigner') ? 'selected' : '' }}>Foreigner</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input class="form-control form-control-sm medium-field" type="text"
-                                                   name="remark" value="{{ $row->remark ?? '' }}">
-                                        </td>
+{{--                                        <td>--}}
+{{--                                            <select class="form-select form-select-sm narrow-field"--}}
+{{--                                                    name="category" required>--}}
+{{--                                                <option value="1" {{ $row->soc_cat_id == '1' ? 'selected' : '' }}>SC</option>--}}
+{{--                                                <option value="2" {{ $row->soc_cat_id == '2' ? 'selected' : '' }}>ST</option>--}}
+{{--                                                <option value="3" {{ $row->soc_cat_id == '3' ? 'selected' : '' }}>OBC</option>--}}
+{{--                                                <option value="4" {{ $row->soc_cat_id == '4' ? 'selected' : '' }}>General</option>--}}
+{{--                                                <option value="5" {{ $row->soc_cat_id == '5' ? 'selected' : '' }}>Others</option>--}}
+{{--                                            </select>--}}
+{{--                                        </td>--}}
+{{--                                        <td>--}}
+{{--                                            <input class="form-control form-control-sm medium-field" type="text" maxlength="12"--}}
+{{--                                                   name="aadhaar" value="{{ $row->aadhaar_no ?? '' }}"--}}
+{{--                                                   oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 12)">--}}
+{{--                                        </td>--}}
+{{--                                        <td>--}}
+{{--                                            <input class="form-control form-control-sm medium-field" type="text"--}}
+{{--                                                   name="apaar" value="{{ $row->apaar_id ?? '' }}">--}}
+{{--                                        </td>--}}
+{{--                                        <td>--}}
+{{--                                            <select class="form-select form-select-sm narrow-field"--}}
+{{--                                                    name="nationality">--}}
+{{--                                                <option value="Indian" {{ ($row->nationality == 'Indian' || empty($row->nationality)) ? 'selected' : '' }}>Indian</option>--}}
+{{--                                                <option value="Foreigner" {{ ($row->nationality == 'Foreigner') ? 'selected' : '' }}>Foreigner</option>--}}
+{{--                                            </select>--}}
+{{--                                        </td>--}}
+{{--                                        <td>--}}
+{{--                                            <input class="form-control form-control-sm medium-field" type="text"--}}
+{{--                                                   name="remark" value="{{ $row->remark ?? '' }}">--}}
+{{--                                        </td>--}}
                                         <td>
                                             <div class="d-flex flex-row gap-2">
                                                 <button type="submit" class="btn btn-sm btn-success">
@@ -301,7 +300,7 @@
         }
 
         /* Ensure the container doesn't force the SVGs larger */
-        .pagination .page-item .page-link, 
+        .pagination .page-item .page-link,
         nav .page-item .page-link {
             display: flex;
             align-items: center;
@@ -334,33 +333,30 @@
             // Initialize page filter functionality
             const pageFilter = document.getElementById('pageFilter');
             const clearPageFilterBtn = document.getElementById('clearPageFilter');
-            
+
             if (!pageFilter) return;
-            
+
             pageFilter.addEventListener('input', function() {
                 const filterTerm = this.value.toLowerCase().trim();
-                
+
                 // Find all student rows on the current page
                 const rows = document.querySelectorAll('.student-row');
-                
+
                 // For each row, check if it matches the filter
                 rows.forEach(row => {
-                    // Get student name from input
-                    const nameInput = row.querySelector('input[name="student_name"]');
-                    const studentName = nameInput ? nameInput.value.toLowerCase() : '';
-                    
+
                     // Get student PEN from span
                     const penSpan = row.querySelector('.student-pen');
                     const studentPen = penSpan ? penSpan.textContent.toLowerCase() : '';
-                    
+
                     // Check if either contains the filter term
                     const matches = studentName.includes(filterTerm) || studentPen.includes(filterTerm);
-                    
+
                     // Show or hide based on match
                     row.style.display = matches || filterTerm === '' ? '' : 'none';
                 });
             });
-            
+
             // Set up clear button
             if (clearPageFilterBtn) {
                 clearPageFilterBtn.addEventListener('click', function() {

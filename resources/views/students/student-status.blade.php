@@ -48,23 +48,48 @@
             <!-- Filter Section -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-body">
-                    <form id="statusForm" method="POST" action="{{ route('students.check-status') }}" class="row g-3">
+                    <form id="statusForm" method="POST" action="{{ route('students.check-status') }}" class="row g-3" x-data="{ searchType: '{{ $searchType ?? 'pen' }}' }">
                         @csrf
-                        <!-- Student PEN Input -->
+                        <!-- Search Type Selection -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Search By</label>
+                            <div class="d-flex">
+                                <div class="form-check me-3">
+                                    <input class="form-check-input" type="radio" name="search_type" id="searchTypePen" value="pen"
+                                           x-model="searchType" checked>
+                                    <label class="form-check-label" for="searchTypePen">
+                                        Student PEN
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="search_type" id="searchTypeName" value="name"
+                                           x-model="searchType">
+                                    <label class="form-check-label" for="searchTypeName">
+                                        Student Name
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search Term Input -->
                         <div class="col-md-6">
-                            <label for="parameter3" class="form-label fw-bold">Student PEN</label>
+                            <label for="search_term" class="form-label fw-bold"
+                                   x-text="searchType === 'pen' ? 'Student PEN' : 'Student Name'"></label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                                <input type="text" class="form-control" id="parameter3" name="parameter3"
-                                       placeholder="Enter Student PEN..."
-                                       value="{{ $pe ?? '' }}" required>
+                                <span class="input-group-text" x-html="searchType === 'pen' ? '<i class=\'fas fa-id-card\'></i>' : '<i class=\'fas fa-user\'></i>'"></span>
+                                <input type="text" class="form-control" id="search_term" name="search_term"
+                                       x-bind:placeholder="searchType === 'pen' ? 'Enter Student PEN...' : 'Enter Student Name...'"
+                                       value="{{ $searchTerm ?? '' }}" required>
+                            </div>
+                            <div class="form-text" x-show="searchType === 'name'">
+                                <i class="fas fa-info-circle me-1"></i> Name search will return all matching students
                             </div>
                         </div>
 
                         <!-- Action buttons -->
-                        <div class="col-md-6 d-flex align-items-end">
+                        <div class="col-md-2 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary me-2">
-                                <i class="fas fa-search me-1"></i> Check Status
+                                <i class="fas fa-search me-1"></i> Search
                             </button>
                             <a href="{{ route('students.status') }}" class="btn btn-secondary">
                                 <i class="fas fa-redo me-1"></i> Reset
@@ -76,7 +101,7 @@
 
             <!-- Note -->
             <div class="alert alert-info mb-4">
-                <i class="fas fa-info-circle me-2"></i> Enter the Student PEN to check the present status of the student.
+                <i class="fas fa-info-circle me-2"></i> Search for a student by PEN or name to check their present status.
             </div>
 
             <!-- Results Section -->
@@ -97,6 +122,7 @@
 
                         <div class="mb-3">
                             <p class="text-primary fw-bold">School: {{ $schname }} of the District: {{ $dstname }}</p>
+                            <p>Found {{ $rows->count() }} student(s)</p>
                         </div>
 
                         <div class="table-responsive">
@@ -121,9 +147,9 @@
                                 @foreach ($rows as $row)
                                     <tr>
                                         <td>
-                                                <span class="badge bg-{{ $row->stud_status == 'E' ? 'success' : ($row->stud_status == 'P' ? 'warning' : 'danger') }} px-3 py-2">
-                                                    {{ $row->ststatus }}
-                                                </span>
+                                            <span class="badge bg-{{ $row->stud_status == 'E' ? 'success' : ($row->stud_status == 'P' ? 'warning' : 'danger') }} px-3 py-2">
+                                                {{ $row->ststatus }}
+                                            </span>
                                         </td>
                                         <td>
                                             <span class="badge bg-info text-dark px-3 py-2">{{ $row->trf }}</span>
@@ -144,39 +170,41 @@
                             </table>
                         </div>
 
-                        <!-- Action Buttons Based on Status -->
-                        @php
-                            $status = $rows[0]->stud_status ?? '';
-                            $actionRoute = '';
-                            $actionText = '';
-                            $actionIcon = '';
-                            $actionClass = '';
+                        <!-- Action Buttons Based on Status - Only for single student view -->
+                        @if($rows->count() == 1)
+                            @php
+                                $status = $rows[0]->stud_status ?? '';
+                                $actionRoute = '';
+                                $actionText = '';
+                                $actionIcon = '';
+                                $actionClass = '';
 
-                            if (in_array($status, ['W', 'T', 'A', 'O'])) {
-                                $actionRoute = 'student-dropbox';
-                                $actionText = 'Go to Dropbox Facility';
-                                $actionIcon = 'inbox';
-                                $actionClass = 'btn-success';
-                            } elseif ($status == 'P') {
-                                $actionRoute = 'students.transfers';  // You'll need to create this route
-                                $actionText = 'Go to Transfer Facility';
-                                $actionIcon = 'exchange-alt';
-                                $actionClass = 'btn-warning';
-                            }
-                        @endphp
+                                if (in_array($status, ['W', 'T', 'A', 'O'])) {
+                                    $actionRoute = 'student-dropbox';
+                                    $actionText = 'Go to Dropbox Facility';
+                                    $actionIcon = 'inbox';
+                                    $actionClass = 'btn-success';
+                                } elseif ($status == 'P') {
+                                    $actionRoute = 'students.transfers';  // You'll need to create this route
+                                    $actionText = 'Go to Transfer Facility';
+                                    $actionIcon = 'exchange-alt';
+                                    $actionClass = 'btn-warning';
+                                }
+                            @endphp
 
-                        @if($actionRoute)
-                            <div class="d-flex justify-content-end mt-3">
-                                <a href="{{ route($actionRoute) }}" class="btn {{ $actionClass }}">
-                                    <i class="fas fa-{{ $actionIcon }} me-2"></i> {{ $actionText }}
-                                </a>
-                            </div>
+                            @if($actionRoute)
+                                <div class="d-flex justify-content-end mt-3">
+                                    <a href="{{ route($actionRoute) }}" class="btn {{ $actionClass }}">
+                                        <i class="fas fa-{{ $actionIcon }} me-2"></i> {{ $actionText }}
+                                    </a>
+                                </div>
+                            @endif
                         @endif
                     </div>
                 </div>
             @elseif(isset($rows))
                 <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i> No student found with the provided PEN. Please check and try again.
+                    <i class="fas fa-exclamation-triangle me-2"></i> No student found with the provided search term. Please check and try again.
                 </div>
             @endif
         </div>
@@ -254,8 +282,8 @@
                 loading: false,
 
                 init() {
-                    // Focus on the PEN input field when page loads
-                    document.getElementById('parameter3').focus();
+                    // Focus on the search input field when page loads
+                    document.getElementById('search_term').focus();
 
                     // Add loading state to form submission
                     const form = document.getElementById('statusForm');

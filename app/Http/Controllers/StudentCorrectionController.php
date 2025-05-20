@@ -319,7 +319,7 @@ class StudentCorrectionController extends Controller
     public function update(Request $request)
     {
         $originalStudentPen = $request->input('student_pen');
-        $newStudentPen = $request->input('new_student_pen', $originalStudentPen);
+        $newStudentPen = $request->input('new_student_pen');
         // Get the teacher ID from session
         $tid = $this->getTeacherId();
 
@@ -362,8 +362,8 @@ class StudentCorrectionController extends Controller
             $apaar = !empty($validated['apaar']) ? $validated['apaar'] : null;
             $remark = !empty($validated['remark']) ? $validated['remark'] : null;
 
-            // Check if student_pen is being updated
-            if ($newStudentPen !== $originalStudentPen) {
+            // Only check for PEN change if a new PEN is provided
+            if (!empty($newStudentPen) && $newStudentPen !== $originalStudentPen) {
                 // First, check if the new student_pen already exists
                 $existingStudent = DB::table('sms.student_profile')
                     ->where('student_pen', $newStudentPen)
@@ -374,102 +374,47 @@ class StudentCorrectionController extends Controller
                     return redirect()->route('students.correction')
                         ->with('error', 'Cannot update: A student with the new PEN already exists.');
                 }
-
-                // Update the student_pen by creating a new record and deleting the old one
-                // First, get the original student record
-                $studentData = DB::table('sms.student_profile')
-                    ->where('student_pen', $originalStudentPen)
-                    ->where('udise_cd', $udise)
-                    ->first();
-
-                if (!$studentData) {
-                    return redirect()->route('students.correction')
-                        ->with('error', 'Student record not found.');
-                }
-
-                // Create a new array with all the student data including our updates
-                $newStudentData = [
-                    'student_pen' => $newStudentPen,
-                    'student_name' => $validated['student_name'],
-                    'father_name' => $validated['father_name'],
-                    'mother_name' => $validated['mother_name'],
-                    'gender' => $validated['gender'],
-                    'student_dob' => $validated['dob'],
-                    'mobile_no_1' => $validated['mobile'],
-                    'cwsn_yn' => $validated['cwsn'],
-                    'pres_class' => (int)$validated['class'],
-                    'class_id' => (int)$validated['class'],
-                    'section_id' => (int)$validated['section'],
-                    'stud_status' => $validated['status'],
-                    'soc_cat_id' => $validated['category'],
-                    'aadhaar_no' => $aadhaar,
-                    'apaar_id' => $apaar,
-                    'nationality' => $validated['nationality'],
-                    'remark' => $remark,
-                    'last_upd_date' => now(),
-                    'udise_cd' => $udise,
-                    // Copy any other fields from $studentData that need to be preserved
-                ];
-
-                // Start a transaction to ensure data consistency
-                DB::beginTransaction();
-
-                try {
-                    // Insert the new record
-                    $inserted = DB::table('sms.student_profile')->insert($newStudentData);
-
-                    // Delete the old record
-                    $deleted = DB::table('sms.student_profile')
-                        ->where('student_pen', $originalStudentPen)
-                        ->where('udise_cd', $udise)
-                        ->delete();
-
-                    if ($inserted && $deleted) {
-                        DB::commit();
-                        return redirect()->route('students.correction')
-                            ->with('success', "Student {$validated['student_name']} updated with new PEN successfully!");
-                    } else {
-                        DB::rollBack();
-                        return redirect()->route('students.correction')
-                            ->with('error', 'Failed to update student PEN.');
-                    }
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    return redirect()->route('students.correction')
-                        ->with('error', 'Error updating student PEN: ' . $e->getMessage());
-                }
-            } else {
-                // Regular update without changing student_pen
-                $updated = DB::table('sms.student_profile')
-                    ->where('student_pen', $originalStudentPen)
-                    ->update([
-                        'gender' => $validated['gender'],
-                        'soc_cat_id' => $validated['category'],
-                        'cwsn_yn' => $validated['cwsn'],
-                        'student_name' => $validated['student_name'],
-                        'father_name' => $validated['father_name'],
-                        'mother_name' => $validated['mother_name'],
-                        'last_upd_date' => now(),
-                        'student_dob' => $validated['dob'],
-                        'mobile_no_1' => $validated['mobile'],
-                        'pres_class' => (int)$validated['class'],
-                        'class_id' => (int)$validated['class'],
-                        'section_id' => (int)$validated['section'],
-                        'stud_status' => $validated['status'],
-                        'aadhaar_no' => $aadhaar,
-                        'apaar_id' => $apaar,
-                        'nationality' => $validated['nationality'],
-                        'remark' => $remark
-                    ]);
-
-                if ($updated) {
-                    return redirect()->route('students.correction')
-                        ->with('success', "Student {$validated['student_name']} updated successfully!");
-                }
-
-                return redirect()->route('students.correction')
-                    ->with('error', 'No changes were made to the student record.');
             }
+
+            // Prepare the update data
+            $updateData = [
+                'gender' => $validated['gender'],
+                'soc_cat_id' => $validated['category'],
+                'cwsn_yn' => $validated['cwsn'],
+                'student_name' => $validated['student_name'],
+                'father_name' => $validated['father_name'],
+                'mother_name' => $validated['mother_name'],
+                'last_upd_date' => now(),
+                'student_dob' => $validated['dob'],
+                'mobile_no_1' => $validated['mobile'],
+                'pres_class' => (int)$validated['class'],
+                'class_id' => (int)$validated['class'],
+                'section_id' => (int)$validated['section'],
+                'stud_status' => $validated['status'],
+                'aadhaar_no' => $aadhaar,
+                'apaar_id' => $apaar,
+                'nationality' => $validated['nationality'],
+                'remark' => $remark
+            ];
+
+            // Add student_pen to update data ONLY if a new valid PEN is provided
+            if (!empty($newStudentPen) && $newStudentPen !== $originalStudentPen) {
+                $updateData['student_pen'] = $newStudentPen;
+            }
+
+            // Perform the update
+            $updated = DB::table('sms.student_profile')
+                ->where('student_pen', $originalStudentPen)
+                ->where('udise_cd', $udise)
+                ->update($updateData);
+
+            if ($updated) {
+                return redirect()->route('students.correction')
+                    ->with('success', "Student {$validated['student_name']} updated successfully!");
+            }
+
+            return redirect()->route('students.correction')
+                ->with('error', 'No changes were made to the student record.');
         } catch (\Exception $e) {
             return redirect()->route('students.correction')
                 ->with('error', 'Error updating student: ' . $e->getMessage());
@@ -501,36 +446,36 @@ class StudentCorrectionController extends Controller
             // Validate request with clear error messages
             $validated = $request->validate([
                 'student_pen' => 'required|string',
-                'student_name' => 'required|string|max:100',
+//                'student_name' => 'required|string|max:100',
                 'status' => 'required|in:E,W,T,A,D,P,O',
-                'category' => 'required|in:1,2,3,4,5',
-                'aadhaar' => 'nullable|string|max:12',
-                'apaar' => 'nullable|string|max:50',
-                'nationality' => 'nullable|string|max:50',
-                'remark' => 'nullable|string|max:255'
+//                'category' => 'required|in:1,2,3,4,5',
+//                'aadhaar' => 'nullable|string|max:12',
+//                'apaar' => 'nullable|string|max:50',
+//                'nationality' => 'nullable|string|max:50',
+//                'remark' => 'nullable|string|max:255'
             ], [
-                'student_name.required' => 'The student name field is required.',
+//                'student_name.required' => 'The student name field is required.',
                 'status.required' => 'The status field is required.',
-                'category.required' => 'The category field is required.'
+//                'category.required' => 'The category field is required.'
             ]);
 
             // Update student record
             $updated = DB::table('sms.student_profile')
                 ->where('student_pen', $validated['student_pen'])
                 ->update([
-                    'student_name' => $validated['student_name'],
+//                    'student_name' => $validated['student_name'],
                     'stud_status' => $validated['status'],
-                    'soc_cat_id' => $validated['category'],
-                    'aadhaar_no' => !empty($validated['aadhaar']) ? $validated['aadhaar'] : null,
-                    'apaar_id' => !empty($validated['apaar']) ? $validated['apaar'] : null,
-                    'nationality' => $validated['nationality'],
-                    'remark' => !empty($validated['remark']) ? $validated['remark'] : null,
+//                    'soc_cat_id' => $validated['category'],
+//                    'aadhaar_no' => !empty($validated['aadhaar']) ? $validated['aadhaar'] : null,
+//                    'apaar_id' => !empty($validated['apaar']) ? $validated['apaar'] : null,
+//                    'nationality' => $validated['nationality'],
+//                    'remark' => !empty($validated['remark']) ? $validated['remark'] : null,
                 ]);
 
             if ($updated) {
 
                 return redirect()->back()
-                    ->with('success', "Student {$validated['student_name']} updated successfully!");
+                    ->with('success', "Student updated successfully!");
             }
 
             return redirect()->back()

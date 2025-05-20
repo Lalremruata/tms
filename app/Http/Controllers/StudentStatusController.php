@@ -37,7 +37,7 @@ class StudentStatusController extends Controller
     }
 
     /**
-     * Check the student's status based on PEN
+     * Check the student's status based on PEN or name
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
@@ -49,10 +49,12 @@ class StudentStatusController extends Controller
 
         // Validate request
         $request->validate([
-            'parameter3' => 'required|string',  // Student PEN
+            'search_type' => 'required|in:pen,name',
+            'search_term' => 'required|string',
         ]);
 
-        $pe = $request->parameter3;
+        $searchType = $request->search_type;
+        $searchTerm = $request->search_term;
 
         // Get teacher's school information
         $teacherSchool = DB::table('mizoram115.school_master as a')
@@ -74,8 +76,8 @@ class StudentStatusController extends Controller
         if ($teacherSchool) {
             $rw[] = (array)$teacherSchool;
 
-            // Query student status and information
-            $rows = DB::table('sms.student_profile as a')
+            // Base query for student status and information
+            $query = DB::table('sms.student_profile as a')
                 ->join('mizoram115.school_master as b', 'a.udise_cd', '=', 'b.udise_sch_code')
                 ->select(
                     'a.udise_cd',
@@ -123,9 +125,17 @@ class StudentStatusController extends Controller
                         END AS clsid"),
                     'a.pres_class',
                     'a.stud_status'
-                )
-                ->where('a.student_pen', $pe)
-                ->get();
+                );
+
+            // Apply search condition based on search type
+            if ($searchType == 'pen') {
+                $query->where('a.student_pen', $searchTerm);
+            } else { // name search
+                $query->where('a.student_name', 'ILIKE', '%' . $searchTerm . '%');
+            }
+
+            // Execute the query
+            $rows = $query->get();
 
             // Format dates for display
             foreach ($rows as $row) {
@@ -142,6 +152,6 @@ class StudentStatusController extends Controller
             return back()->with('error', 'Only Teacher from This School can use the Transfer from Other School Facility, Please Select another Teacher ...!!!');
         }
 
-        return view('students.student-status', compact('rows', 'rw', 'pe'));
+        return view('students.student-status', compact('rows', 'rw', 'searchType', 'searchTerm'));
     }
 }
